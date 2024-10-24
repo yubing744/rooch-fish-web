@@ -24,7 +24,7 @@ import CountUp from "react-countup";
 import "./App.css";
 import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
-import {Pond} from './scene/pond';
+import { PondScene } from './scenes/pond_scene';
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -341,7 +341,7 @@ function App() {
           </Stack>
         </Drawer>
         <Main open={showLeaderboard}>
-          <Pond width={800} height={600} />
+          <PondScene width={800} height={600} />
         </Main>
       </Stack>
     </Stack>
