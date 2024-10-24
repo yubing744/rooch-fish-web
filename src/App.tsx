@@ -24,6 +24,7 @@ import CountUp from "react-countup";
 import "./App.css";
 import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
+import {Pond} from './scene/pond';
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -101,7 +102,7 @@ function App() {
   const { data, refetch } = useRoochClientQuery(
     "getStates",
     {
-      accessPath: `/object/${gameStateObjectID}`,
+      accessPath: `/object/${roochCounterObject}`,
       stateOption: {
         decode: true,
       },
@@ -110,7 +111,20 @@ function App() {
   );
 
   console.log("game-state:", data);
-  
+
+  const { data: roochFishGameState, refetch: roochFishRefetch } = useRoochClientQuery(
+    "getStates",
+    {
+      accessPath: `/object/${gameStateObjectID}`,
+      stateOption: {
+        decode: true,
+      },
+    },
+    { refetchInterval: 3000 }
+  );
+
+  console.log("game-state:", roochFishGameState);
+
   const { data: RCCBalance, refetch: refetchRCCBalance } = useRoochClientQuery(
     "getBalance",
     {
@@ -222,7 +236,7 @@ function App() {
       <Stack className="w-full" justifyContent="space-between">
         <Stack>
           <Typography className="text-4xl font-semibold mt-6 text-left w-full mb-4">
-            Rooch Clicker |{" "}
+            Rooch Fish |{" "}
             {RCCBalance && (
               <span className="text-2xl">
                 Balance: {fNumber(RCCBalance.balance.toString())} RCC{" "}
@@ -327,125 +341,7 @@ function App() {
           </Stack>
         </Drawer>
         <Main open={showLeaderboard}>
-          <Stack
-            spacing={2}
-            className="text-xl w-full text-center items-center justify-center"
-          >
-            <Typography>Join our Click Challenge!</Typography>
-            <Typography>
-              Every time you hit a multiple of{" "}
-              <span className="font-semibold">21</span>,
-            </Typography>
-            <Typography>You're in for 1,000 RCC!</Typography>
-          </Stack>
-          <Button
-            className="!mt-4"
-            onClick={() => {
-              setShowLeaderboard(!showLeaderboard);
-            }}
-            variant="outlined"
-          >
-            Leaderboard
-          </Button>
-          <Typography className="text-base !mt-4">
-            Global Clicker Counter:{" "}
-          </Typography>
-          <Typography className="text-base">
-            Next Bonus Click:{" "}
-            {getNextRewardClick(
-              Number(
-                data?.[0].decoded_value?.value.global_click_count.toString()
-              )
-            )}{" "}
-          </Typography>
-          <Typography
-            className="tracking-wide font-black"
-            sx={{
-              fontSize: showLeaderboard ? "160px" : "240px",
-            }}
-            onClick={async () => {
-              if (!sessionKey) {
-                return;
-              }
-              try {
-                setTxnLoading(true);
-                const txn = new Transaction();
-                txn.callFunction({
-                  address: counterAddress,
-                  module: "clicker",
-                  function: "click",
-                  args: [
-                    // rooch counter
-                    Args.objectId(roochCounterObject),
-                    // treasury
-                    Args.objectId(treasuryObject),
-                  ],
-                });
-                await signAndExecuteTransaction({ transaction: txn });
-                await Promise.all([refetch(), refetchRCCBalance()]);
-              } catch (error) {
-                console.error(String(error));
-              } finally {
-                setTxnLoading(false);
-              }
-            }}
-          >
-            <CountUp
-              style={{
-                fontVariantNumeric: "tabular-nums lining-nums",
-                userSelect: "none",
-                cursor: "pointer",
-              }}
-              preserveValue
-              duration={3}
-              decimal=","
-              end={Number(
-                data?.[0].decoded_value?.value.global_click_count.toString() ||
-                  0
-              )}
-            />
-          </Typography>
-          <LoadingButton
-            loading={txnLoading}
-            variant="contained"
-            className="w-32"
-            // fullWidth
-            disabled={!sessionKey}
-            onClick={async () => {
-              try {
-                setTxnLoading(true);
-                const txn = new Transaction();
-                txn.callFunction({
-                  address: counterAddress,
-                  module: "clicker",
-                  function: "click",
-                  args: [
-                    // rooch counter
-                    Args.objectId(roochCounterObject),
-                    // treasury
-                    Args.objectId(treasuryObject),
-                  ],
-                });
-                await signAndExecuteTransaction({ transaction: txn });
-                await Promise.all([refetch(), refetchRCCBalance()]);
-              } catch (error) {
-                console.error(String(error));
-                if (String(error).includes("1004")) {
-                  enqueueSnackbar("Insufficient gas, please claim gas first", {
-                    variant: "warning",
-                  });
-                } else {
-                  enqueueSnackbar(String(error), {
-                    variant: "warning",
-                  });
-                }
-              } finally {
-                setTxnLoading(false);
-              }
-            }}
-          >
-            {sessionKey ? "Click!!!" : "Please create Session Key first"}
-          </LoadingButton>
+          <Pond width={800} height={600} />
         </Main>
       </Stack>
     </Stack>
