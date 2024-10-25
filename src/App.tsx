@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Author: Jason Jo
 
+import { config } from "./config";
 import { LoadingButton } from "@mui/lab";
 import { Button, Chip, Drawer, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -25,6 +26,7 @@ import "./App.css";
 import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
 import { PondScene } from './scenes/pond_scene';
+import { useGameState } from './hooks/useGameState';
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -75,11 +77,19 @@ const rccCoinType =
 export const rccCoinStoreType =
   "0x3::coin_store::CoinStore<0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e::rooch_clicker_coin::RCC>";
 
-const roochFishAddress =
-  "0xb8b4ee4df7fb3e09b203eb585f4116e7eb728ec344d45b4885b44cd5719b7232";
+/*
+const fetchGameStateInfo = async (client: RoochClient) => {
+  const data = await client.getStates({
+    accessPath: `/object/${config.gameStateObjectID}`,
+    stateOption: {
+      decode: true,
+    },
+  });
 
-const gameStateObjectID = "0xe7c37dec17c51074c4c8aa721fd5f5b8de573bf3f02fbec883f78cd0af7acbcc";
-
+  return { result: data };
+};
+*/
+  
 function App() {
   const wallets = useWallets();
   const currentAddress = useCurrentAddress();
@@ -99,30 +109,7 @@ function App() {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  const { data, refetch } = useRoochClientQuery(
-    "getStates",
-    {
-      accessPath: `/object/${roochCounterObject}`,
-      stateOption: {
-        decode: true,
-      },
-    },
-    { refetchInterval: 3000 }
-  );
-
-  console.log("game-state:", data);
-
-  const { data: roochFishGameState, refetch: roochFishRefetch } = useRoochClientQuery(
-    "getStates",
-    {
-      accessPath: `/object/${gameStateObjectID}`,
-      stateOption: {
-        decode: true,
-      },
-    },
-    { refetchInterval: 3000 }
-  );
-
+  const { data: roochFishGameState } = useGameState();
   console.log("game-state:", roochFishGameState);
 
   const { data: RCCBalance, refetch: refetchRCCBalance } = useRoochClientQuery(
@@ -141,7 +128,7 @@ function App() {
     }
     setSessionLoading(true);
 
-    const defaultScopes = [`${counterAddress}::*::*`];
+    const defaultScopes = [`${config.roochFishAddress}::*::*`];
     createSessionKey(
       {
         appName: "rooch_clicker",
@@ -309,20 +296,21 @@ function App() {
                   Number((a.decoded_value?.value.balance as any).value.value)
                 );
               })
-              .map((i) => {
+              .map((item: any, i: number) => {
                 return (
                   <Stack
+                    key={"stack-" + i}
                     className="w-full"
                     justifyContent="space-between"
                     sx={{
                       fontWeight:
-                        i.owner === currentAddress?.genRoochAddress().toStr()
+                      item.owner === currentAddress?.genRoochAddress().toStr()
                           ? 700
                           : 500,
                     }}
                   >
                     <Typography>
-                      {shortAddress(i.owner_bitcoin_address, 6, 6)}
+                      {shortAddress(item.owner_bitcoin_address, 6, 6)}
                     </Typography>
                     <Typography
                       style={{
@@ -331,7 +319,7 @@ function App() {
                     >
                       {fNumber(
                         Number(
-                          (i.decoded_value?.value.balance as any).value.value
+                          (item.decoded_value?.value.balance as any).value.value
                         )
                       )}
                     </Typography>
