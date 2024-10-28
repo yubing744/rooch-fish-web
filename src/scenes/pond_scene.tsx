@@ -1,5 +1,5 @@
 import { Container, Graphics, Stage } from '@pixi/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
@@ -25,11 +25,24 @@ import { config } from "../config/index";
 export const PondScene = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
-  const { data } = usePondState(0);
+  const { data: pondState, fishData } = usePondState(0);
   const { fish_ids } = usePlayerState(0)
   
-  //console.log("PondScene data:", data);
+  //console.log("PondScene data:", pondState);
+  //console.log("Player fish_ids:", fish_ids);
   
+  /*
+  useEffect(() => {
+    if (!pondState) {
+      return
+    }
+
+    pondState.fishData && pondState.fishData.map((fishState: any, index: number) => {
+      console.log(`Fish ${index} position:`, fishState.x, fishState.y);
+    })
+  }, [pondState]);
+  */
+ 
   // Stage dimensions
   const width = 800;
   const height = 600;
@@ -53,7 +66,7 @@ export const PondScene = () => {
     return [blur, colorMatrix];
   }, []);
 
-  const fishState = useFishController(100, 100, boundaries);
+  const fishState = useFishController(0, fish_ids ? fish_ids[0]:0, 100, 100, boundaries);
 
   const foodItems = useMemo(() => {
     const items = [];
@@ -143,12 +156,15 @@ export const PondScene = () => {
           {/* Container for fish and food items */}
           <Container name="fishContainer" x={20} y={20} width={2000} height={2000}>
             <>
-                <Fish 
-                  x={fishState.x} 
-                  y={fishState.y} 
-                  rotation={fishState.rotation}
-                  scale={0.8} 
-                />
+                {fishData && fishData.map((fishState: any, index: number) => (
+                    <Fish 
+                      key={`fish-${index}`}
+                      x={fishState.x} 
+                      y={fishState.y} 
+                      rotation={0}
+                      scale={0.8} 
+                    />
+                ))}
 
                 {foodItems.map((food, index) => (
                   <Food

@@ -19,7 +19,7 @@ export const listFieldStates = async (client: RoochClient, object_id: string) =>
           ],
         }) as any;
 
-        console.log("🚀 ~ file: listFieldStates ~ data:", data);
+        //console.log("🚀 ~ file: listFieldStates ~ data:", data);
         
         if (!data) {
           throw new Error('No data returned from listFieldStates request');

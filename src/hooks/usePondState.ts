@@ -16,7 +16,7 @@ export function usePondState(pondID: number) {
         decode: true,
       },
     },
-    { refetchInterval: 3000 }
+    { refetchInterval: 30000 }
   );
 
   const pondData = transformObject(data?data[0]:null)
@@ -28,6 +28,9 @@ export function usePondState(pondID: number) {
     enabled: !!fishTableHandleId,
   });
 
+  // console.log("🚀 fish data:", fishData);
+
+  
   const foodTableHandleId = pondData?.foods?.contents?.handle?.id;
   const { data: foodData } = useQuery({
     queryKey: ["listFieldStates", foodTableHandleId],
@@ -35,11 +38,33 @@ export function usePondState(pondID: number) {
     enabled: !!foodTableHandleId,
   });
 
+  //console.log("🚀 food data:", foodData);
+
+  const finalFishData = transformFish(fishData);
+  const finalFoodData = transformFish(foodData);
+
   const finalPondState = pondData ? {
     ...pondData,
-    fishData: fishData,
-    foodData: foodData
   } : null;
 
-  return { data: finalPondState };
+
+  finalFishData && finalFishData.map((fishState: any, index: number) => {
+    console.log(`Fish ${index} position:`, fishState.x, fishState.y);
+  })
+
+  return { data: finalPondState, fishData: finalFishData, foodData: finalFoodData};
+}
+
+function transformFish(data: any): any {
+   const fishData = transformObject(data)
+   return fishData ? Array.from(fishData.result).map((item: any)=>{
+     return item.state
+   }): []
+}
+
+function transformFood(data: any): any {
+  const fishData = transformObject(data)
+  return fishData ? Array.from(fishData?.result).map((item: any)=>{
+    return item.state
+  }) : []
 }

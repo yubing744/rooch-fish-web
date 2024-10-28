@@ -14,4 +14,4 @@ curl 'https://test-seed.rooch.network/' \
   -H 'sec-fetch-mode: cors' \
   -H 'sec-fetch-site: cross-site' \
   -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36' \
-  --data-raw '{"jsonrpc":"2.0","id":1,"method":"rooch_listFieldStates","params":["0xb5cc41d904f4b032455341709a0001a2a4dbb2e6adb83acb3c463191dadf2480",null,null,{"decode":true}]}'
+  --data-raw '{"jsonrpc":"2.0","id":1,"method":"rooch_getStates","params":["/object/0xbdbea1a804f8691dcaa310c06d45ec5d0ead27fcfe5e9828e8a080d0f930e1f7",{"decode":true}]}'

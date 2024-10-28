@@ -1,5 +1,17 @@
+import { config } from "../config/index";
 import { useState, useEffect } from 'react';
-
+import { Args, Transaction } from "@roochnetwork/rooch-sdk";
+import {
+  UseSignAndExecuteTransaction,
+  useConnectWallet,
+  useCreateSessionKey,
+  useCurrentAddress,
+  useCurrentSession,
+  useRemoveSession,
+  useRoochClientQuery,
+  useWalletStore,
+  useWallets,
+} from "@roochnetwork/rooch-sdk-kit";
 interface FishState {
   x: number;
   y: number;
@@ -17,13 +29,41 @@ interface BoundaryProps {
   maxY: number;
 }
 
-export const useFishController = (initialX: number, initialY: number, boundaries: BoundaryProps) => {
+export const useFishController = (pondID:number, fishID: number, initialX: number, initialY: number, boundaries: BoundaryProps) => {
   const [fishState, setFishState] = useState<FishState>({
     x: initialX,
     y: initialY,
     rotation: 0,
     velocity: { x: 0, y: 0 }
   });
+
+  const { mutateAsync: signAndExecuteTransaction } =
+    UseSignAndExecuteTransaction();
+
+  const handleFishMove = async (direction: number) => {
+    console.log("move fish start, with direction:", direction)
+
+    try {
+      const txn = new Transaction();
+      txn.callFunction({
+        address: config.roochFishAddress,
+        module: "rooch_fish", 
+        function: "move_fish",
+        args: [
+          Args.objectId(config.gameStateObjectID),
+          Args.u64(pondID), // pond_id 
+          Args.u64(fishID), // fish_id
+          Args.u8(direction), // direction
+        ],
+      });
+  
+      await signAndExecuteTransaction({ transaction: txn });
+
+      console.log("move fish success")
+    } catch (error) {
+      console.error("move fish fail:" + String(error));
+    }
+  };
 
   const speed = 5;
 
@@ -43,10 +83,25 @@ export const useFishController = (initialX: number, initialY: number, boundaries
         let dx = 0;
         let dy = 0;
 
-        if (keys.has('ArrowLeft') || keys.has('a')) dx -= speed;
-        if (keys.has('ArrowRight') || keys.has('d')) dx += speed;
-        if (keys.has('ArrowUp') || keys.has('w')) dy -= speed;
-        if (keys.has('ArrowDown') || keys.has('s')) dy += speed;
+        if (keys.has('ArrowLeft') || keys.has('a')) {
+          dx -= speed;
+          handleFishMove(3);
+        }
+
+        if (keys.has('ArrowRight') || keys.has('d')) {
+          dx += speed;
+          handleFishMove(1);
+        }
+
+        if (keys.has('ArrowUp') || keys.has('w')) {
+          dy -= speed;
+          handleFishMove(2);
+        }
+
+        if (keys.has('ArrowDown') || keys.has('s')) {
+          dy += speed;
+          handleFishMove(0);
+        }
 
         let newX = Math.max(boundaries.minX, Math.min(boundaries.maxX, prev.x + dx));
         let newY = Math.max(boundaries.minY, Math.min(boundaries.maxY, prev.y + dy));
