@@ -26,7 +26,7 @@ export const PondScene = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const { data } = usePondState(0);
-  const { hasFish } = usePlayerState()
+  const { fish_ids } = usePlayerState(0)
   
   //console.log("PondScene data:", data);
   
@@ -90,8 +90,10 @@ export const PondScene = () => {
       });
   
       await signAndExecuteTransaction({ transaction: txn });
+      setPurchaseLoading(false);
     } catch (error) {
       console.error(String(error));
+
       if (String(error).includes("1004")) {
         enqueueSnackbar("Insufficient gas, please claim gas first", { 
           variant: "warning" 
@@ -163,7 +165,7 @@ export const PondScene = () => {
       </Stage>
 
       {/* Purchase dialog when user has no fish */}
-      {!hasFish && (
+      {(!fish_ids || fish_ids.length==0) && (
         <Paper
           sx={{
             position: 'absolute',
