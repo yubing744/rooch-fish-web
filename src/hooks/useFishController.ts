@@ -3,15 +3,8 @@ import { useState, useEffect } from 'react';
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import {
   UseSignAndExecuteTransaction,
-  useConnectWallet,
-  useCreateSessionKey,
-  useCurrentAddress,
-  useCurrentSession,
-  useRemoveSession,
-  useRoochClientQuery,
-  useWalletStore,
-  useWallets,
 } from "@roochnetwork/rooch-sdk-kit";
+import { useSnackbar } from 'notistack';
 interface FishState {
   x: number;
   y: number;
@@ -37,11 +30,15 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
     velocity: { x: 0, y: 0 }
   });
 
+  const { enqueueSnackbar } = useSnackbar();
+
   const { mutateAsync: signAndExecuteTransaction } =
     UseSignAndExecuteTransaction();
 
   const handleFishMove = async (direction: number) => {
-    console.log("move fish start, with direction:", direction)
+    console.log("move fish start, with direction:", direction, "fish_id:", fishID)
+    
+    setFishState(prev => ({ ...prev, error: undefined }));
 
     try {
       const txn = new Transaction();
@@ -51,17 +48,35 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
         function: "move_fish",
         args: [
           Args.objectId(config.gameStateObjectID),
-          Args.u64(pondID), // pond_id 
-          Args.u64(fishID), // fish_id
-          Args.u8(direction), // direction
+          Args.u64(pondID),
+          Args.u64(fishID),
+          Args.u8(direction),
         ],
       });
   
-      await signAndExecuteTransaction({ transaction: txn });
+      const tx = await signAndExecuteTransaction({ transaction: txn });
+      if (tx.output.status.type != 'executed') {
+        const errorMsg = `Move failed: ${tx.output.status.type}`;
+        console.error("move fish fail:", errorMsg);
+        enqueueSnackbar(errorMsg, { 
+          variant: "warning" 
+        });
+        return;
+      }
 
-      console.log("move fish success")
+      console.log("move fish success, tx:", tx)
     } catch (error) {
-      console.error("move fish fail:" + String(error));
+      console.error("move fish error:", error);
+
+      if (String(error).includes("1004")) {
+        enqueueSnackbar("Insufficient gas, please claim gas first", { 
+          variant: "warning" 
+        });
+      } else {
+        enqueueSnackbar(String(error), {
+          variant: "warning"
+        });
+      }
     }
   };
 
@@ -120,7 +135,7 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
       });
     };
 
-    const gameLoop = setInterval(updatePosition, 16);
+    const gameLoop = setInterval(updatePosition, 100);
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -130,7 +145,7 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [boundaries, speed]);
+  }, [pondID, fishID, boundaries, speed]);
 
   return fishState;
 };

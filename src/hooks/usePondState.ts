@@ -16,7 +16,7 @@ export function usePondState(pondID: number) {
         decode: true,
       },
     },
-    { refetchInterval: 30000 }
+    { refetchInterval: 20000 }
   );
 
   const pondData = transformObject(data?data[0]:null)
@@ -26,6 +26,7 @@ export function usePondState(pondID: number) {
     queryKey: ["listFieldStates", fishTableHandleId],
     queryFn: async () => fishTableHandleId ? listFieldStates(client, fishTableHandleId) : null,
     enabled: !!fishTableHandleId,
+    refetchInterval: 500,
   });
 
   // console.log("🚀 fish data:", fishData);
@@ -47,10 +48,11 @@ export function usePondState(pondID: number) {
     ...pondData,
   } : null;
 
-
+  /*
   finalFishData && finalFishData.map((fishState: any, index: number) => {
     console.log(`Fish ${index} position:`, fishState.x, fishState.y);
   })
+  */
 
   return { data: finalPondState, fishData: finalFishData, foodData: finalFoodData};
 }

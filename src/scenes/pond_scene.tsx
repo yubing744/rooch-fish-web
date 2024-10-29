@@ -1,19 +1,11 @@
 import { Container, Graphics, Stage } from '@pixi/react';
 import { useMemo, useEffect, useState } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Button, Paper, Typography, Grid } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import {
   UseSignAndExecuteTransaction,
-  useConnectWallet,
-  useCreateSessionKey,
-  useCurrentAddress,
-  useCurrentSession,
-  useRemoveSession,
-  useRoochClientQuery,
-  useWalletStore,
-  useWallets,
 } from "@roochnetwork/rooch-sdk-kit";
 import { Fish } from '../components/fish';
 import { Food } from '../components/food';
@@ -28,24 +20,18 @@ export const PondScene = () => {
   const { data: pondState, fishData } = usePondState(0);
   const { fish_ids } = usePlayerState(0)
   
-  //console.log("PondScene data:", pondState);
-  //console.log("Player fish_ids:", fish_ids);
-  
-  /*
-  useEffect(() => {
-    if (!pondState) {
-      return
-    }
-
-    pondState.fishData && pondState.fishData.map((fishState: any, index: number) => {
-      console.log(`Fish ${index} position:`, fishState.x, fishState.y);
-    })
-  }, [pondState]);
-  */
- 
-  // Stage dimensions
   const width = 800;
-  const height = 600;
+  const height = 800;
+
+  const scale = useMemo(() => {
+    if (!pondState) return 1;
+    
+    const horizontalScale = (width - 80) / pondState.width;
+    const verticalScale = (height - 80) / pondState.height;
+    
+    // Use the smaller scale to ensure pond fits within boundaries
+    return Math.min(horizontalScale, verticalScale); 
+  }, [pondState, width, height]);
 
   const boundaries = useMemo(() => ({
     minX: 40,
@@ -54,19 +40,15 @@ export const PondScene = () => {
     maxY: height - 80
   }), [width, height]);
 
-  // Filters for water effect
   const waterFilters = useMemo(() => {
     const blur = new BlurFilter(2);
     const colorMatrix = new ColorMatrixFilter();
     
-    // Add slight blue tint to create water effect
     colorMatrix.brightness(1.1);
     colorMatrix.tint(0x4FA4FF, 0.2);
     
     return [blur, colorMatrix];
   }, []);
-
-  const fishState = useFishController(0, fish_ids ? fish_ids[0]:0, 100, 100, boundaries);
 
   const foodItems = useMemo(() => {
     const items = [];
@@ -84,6 +66,12 @@ export const PondScene = () => {
     return items;
   }, [width, height]);
 
+  const playerFirstFish = useMemo(() => {
+    if (!fish_ids || !fishData || fish_ids.length === 0) return null;
+    return fishData.find((fish: any) => fish.id === fish_ids[0]);
+  }, [fish_ids, fishData]);
+
+  useFishController(0, playerFirstFish ? parseInt(playerFirstFish.id) : 0, 100, 100, boundaries);
 
   const { mutateAsync: signAndExecuteTransaction } =
       UseSignAndExecuteTransaction();
@@ -122,92 +110,112 @@ export const PondScene = () => {
   };
 
   return (
-    <Box position="relative">
-      <Stage 
-        width={width} 
-        height={height} 
-        options={{ 
-          backgroundColor: 0xADD8E6,
-          antialias: true 
-        }}
-      >
-        <Container>
-          {/* Pond background with water effect */}
-          <Graphics
-            draw={g => {
-              // Draw pond shape with rounded corners
-              g.clear();
-              g.beginFill(0x4FA4FF, 0.3);
-              g.drawRoundedRect(20, 20, width - 40, height - 40, 15);
-              g.endFill();
-            }}
-            filters={waterFilters}
-          />
-          
-          {/* Pond border */}
-          <Graphics
-            draw={g => {
-              g.clear();
-              g.lineStyle(4, 0x2980B9);
-              g.drawRoundedRect(20, 20, width - 40, height - 40, 15);
-            }}
-          />
-
-          {/* Container for fish and food items */}
-          <Container name="fishContainer" x={20} y={20} width={2000} height={2000}>
-            <>
-                {fishData && fishData.map((fishState: any, index: number) => (
-                    <Fish 
-                      key={`fish-${index}`}
-                      x={fishState.x} 
-                      y={fishState.y} 
-                      rotation={0}
-                      scale={0.8} 
-                    />
-                ))}
-
-                {foodItems.map((food, index) => (
-                  <Food
-                    key={`food-${index}`}
-                    x={food.x}
-                    y={food.y}
-                    size={food.size}
-                    color={food.color}
-                  />
-                ))}
-              </>
-          </Container>
-        </Container>
-      </Stage>
-
-      {/* Purchase dialog when user has no fish */}
-      {(!fish_ids || fish_ids.length==0) && (
-        <Paper
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            padding: 3,
-            textAlign: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(4px)',
+    <Box>
+      <Box position="relative">
+        <Stage 
+          width={width} 
+          height={height} 
+          options={{ 
+            backgroundColor: 0xADD8E6,
+            antialias: true 
           }}
         >
-          <Typography variant="h6" gutterBottom>
-            Welcome to the Pond!
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            You don't have a fish yet. Purchase one to start playing!
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handlePurchaseFish}
-            disabled={purchaseLoading}
+          <Container>
+            <Graphics
+              draw={g => {
+                g.clear();
+                g.beginFill(0x4FA4FF, 0.3);
+                g.drawRoundedRect(20, 20, width - 40, height - 40, 15);
+                g.endFill();
+              }}
+              filters={waterFilters}
+            />
+            
+            <Graphics
+              draw={g => {
+                g.clear();
+                g.lineStyle(4, 0x2980B9);
+                g.drawRoundedRect(20, 20, width - 40, height - 40, 15);
+              }}
+            />
+
+            <Container name="fishContainer" x={20} y={20} width={2000} height={2000}>
+              <>
+                  {fishData && fishData.map((fishState: any, index: number) => (
+                      <Fish 
+                        key={`fish-${index}`}
+                        x={40 + fishState.x * scale} 
+                        y={40 + fishState.y * scale} 
+                        rotation={0}
+                        scale={0.8} 
+                      />
+                  ))}
+
+                  {foodItems.map((food, index) => (
+                    <Food
+                      key={`food-${index}`}
+                      x={food.x}
+                      y={food.y}
+                      size={food.size}
+                      color={food.color}
+                    />
+                  ))}
+                </>
+            </Container>
+          </Container>
+        </Stage>
+
+        {(!fish_ids || fish_ids.length==0) && (
+          <Paper
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              padding: 3,
+              textAlign: 'center',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(4px)',
+            }}
           >
-            {purchaseLoading ? 'Purchasing...' : 'Purchase Fish'}
-          </Button>
+            <Typography variant="h6" gutterBottom>
+              Welcome to the Pond!
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              You don't have a fish yet. Purchase one to start playing!
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlePurchaseFish}
+              disabled={purchaseLoading}
+            >
+              {purchaseLoading ? 'Purchasing...' : 'Purchase Fish'}
+            </Button>
+          </Paper>
+        )}
+      </Box>
+
+      {playerFirstFish && (
+        <Paper 
+          sx={{ 
+            mt: 2,
+            p: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)'
+          }}
+        >
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Typography>
+                X: {Math.round(playerFirstFish.x)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography>
+                Y: {Math.round(playerFirstFish.y)}
+              </Typography>
+            </Grid>
+          </Grid>
         </Paper>
       )}
     </Box>
