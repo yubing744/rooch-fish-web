@@ -54,10 +54,12 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
         ],
       });
   
+      (txn as any).data.maxGas = BigInt(50000000 * 10)
+
       const tx = await signAndExecuteTransaction({ transaction: txn });
       if (tx?.output?.status?.type != 'executed') {
         const errorMsg = `Move failed: ${tx?.output?.status?.type}`;
-        console.error("move fish fail:", errorMsg);
+        console.error("move fish fail:", tx?.output?.status);
         enqueueSnackbar(errorMsg, { 
           variant: "warning" 
         });

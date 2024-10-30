@@ -204,7 +204,7 @@ export const PondScene = () => {
                         x={40 + fishState.x * scale} 
                         y={40 + fishState.y * scale} 
                         rotation={0}
-                        scale={fishState.size / 50} 
+                        scale={fishState.size / 20} 
                         color={playerFirstFish?.id == fishState.id ? BlueColor : RedColor}
                       />
                   ))}
@@ -214,7 +214,7 @@ export const PondScene = () => {
                       key={`food-${index}`}
                       x={40 + food.x * scale}
                       y={40 + food.y * scale}
-                      size={10}
+                      size={food.size * scale}
                       color={YellowColor}
                     />
                   ))}

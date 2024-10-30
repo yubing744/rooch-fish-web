@@ -40,7 +40,7 @@ export function usePondState(pondID: PondID) {
     refetchInterval: 5000,
   });
 
-  console.log("🚀 food data:", foodData);
+  //console.log("🚀 food data:", foodData);
 
   const finalFishData = transformFish(fishData);
   const finalFoodData = transformFood(foodData);
