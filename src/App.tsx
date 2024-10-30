@@ -71,8 +71,8 @@ const treasuryObject =
 const treasuryOwnerAddress =
   "rooch1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqhxqaen";
 
-const rccCoinType =
-  "0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e::rooch_clicker_coin::RCC";
+const rgasCoinType =
+  "0x3::gas_coin::RGas";
 
 export const rccCoinStoreType =
   "0x3::coin_store::CoinStore<0x872502737008ac71c4c008bb3846a688bfd9fa54c6724089ea51b72f813dc71e::rooch_clicker_coin::RCC>";
@@ -116,7 +116,7 @@ function App() {
     "getBalance",
     {
       owner: currentAddress?.genRoochAddress().toStr() || "",
-      coinType: rccCoinType,
+      coinType: rgasCoinType,
     }
   );
 
@@ -226,8 +226,8 @@ function App() {
             Rooch Fish |{" "}
             {RCCBalance && (
               <span className="text-2xl">
-                Balance: {fNumber(RCCBalance.balance.toString())} RCC{" "}
-                <span className="text-xs ml-2">( Rooch Clicker Coin )</span>
+                Balance: {fNumber(RCCBalance.balance.toString(), 8)} RGas{" "}
+                <span className="text-xs ml-2">( Rooch Gas Coin )</span>
               </span>
             )}
           </Typography>

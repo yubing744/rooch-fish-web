@@ -1,7 +1,7 @@
 import { Container, Graphics, Stage } from '@pixi/react';
 import { useMemo, useEffect, useState } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
-import { Box, Button, Paper, Typography, Grid } from '@mui/material';
+import { Box, Button, Paper, Typography, Grid,  AppBar, Toolbar } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import {
@@ -14,14 +14,22 @@ import { usePondState } from '../hooks/usePondState';
 import { usePlayerState } from '../hooks/usePlayerState';
 import { config } from "../config/index";
 
+
+const RedColor = 0xFF6B6B
+const BlueColor = 0x0000FF
+const YellowColor = 0xFFFF00
+
 export const PondScene = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
-  const { data: pondState, fishData } = usePondState(0);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const { data: pondState, fishData, foodData } = usePondState(0);
   const { fish_ids } = usePlayerState(0)
   
   const width = 800;
   const height = 800;
+
+  //console.log("foodData:", foodData)
 
   const scale = useMemo(() => {
     if (!pondState) return 1;
@@ -109,8 +117,57 @@ export const PondScene = () => {
     }
   };
 
+  const handleFeedPond = async () => {
+    try {
+      setFeedLoading(true);
+      const txn = new Transaction();
+      txn.callFunction({
+        address: config.roochFishAddress,
+        module: "rooch_fish",
+        function: "feed_food",
+        args: [
+          Args.objectId(config.gameStateObjectID),
+          Args.u64(BigInt(0)), // pond_id
+          Args.u256(BigInt(100000000)), // 1RGas
+        ],
+      });
+
+      const tx = await signAndExecuteTransaction({ transaction: txn });
+      if (tx?.output?.status?.type != 'executed') {
+        const errorMsg = `Feed food failed: ${tx?.output?.status?.type}`;
+        console.error("Feed food fail:", errorMsg);
+        enqueueSnackbar(errorMsg, { 
+          variant: "warning" 
+        });
+        return;
+      }
+
+      console.log("Feed food success!")
+      enqueueSnackbar("Successfully fed the pond!", { variant: "success" });
+    } catch (error) {
+      console.error(String(error));
+      enqueueSnackbar(String(error), { variant: "error" });
+    } finally {
+      setFeedLoading(false);
+    }
+  };
+
   return (
     <Box>
+      <AppBar position="static" color="transparent" elevation={0} sx={{ mb: 2 }}>
+        <Toolbar>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleFeedPond}
+            disabled={feedLoading}
+            sx={{ mr: 2 }}
+          >
+            {feedLoading ? 'Feeding...' : 'Feed Pond (0.1 RGas)'}
+          </Button>
+        </Toolbar>
+      </AppBar>
+
       <Box position="relative">
         <Stage 
           width={width} 
@@ -147,17 +204,18 @@ export const PondScene = () => {
                         x={40 + fishState.x * scale} 
                         y={40 + fishState.y * scale} 
                         rotation={0}
-                        scale={0.8} 
+                        scale={fishState.size / 50} 
+                        color={playerFirstFish?.id == fishState.id ? BlueColor : RedColor}
                       />
                   ))}
 
-                  {foodItems.map((food, index) => (
+                  {foodData && foodData.map((food: any, index: number) => (
                     <Food
                       key={`food-${index}`}
-                      x={food.x}
-                      y={food.y}
-                      size={food.size}
-                      color={food.color}
+                      x={40 + food.x * scale}
+                      y={40 + food.y * scale}
+                      size={10}
+                      color={YellowColor}
                     />
                   ))}
                 </>

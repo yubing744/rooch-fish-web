@@ -25,14 +25,14 @@ export function shortAddress(
 
 type InputValue = string | number | null;
 
-export function fNumber(inputValue: InputValue) {
+export function fNumber(inputValue: InputValue, decimals:number) {
   if (inputValue === undefined) return "";
 
-  const number = Number(inputValue);
+  const number = Number(inputValue) / Math.pow(10, decimals);
 
   const fm = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 100,
+    maximumFractionDigits: decimals,
   }).format(number);
 
   return fm;
