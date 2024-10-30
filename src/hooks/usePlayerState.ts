@@ -8,7 +8,7 @@ const queryUserFishs = async (client: RoochClient, pondID: number, playerAddress
     target: `${config.roochFishAddress}::rooch_fish::get_pond_player_fish_ids`,
     args: [
       Args.objectId(config.gameStateObjectID),
-      Args.u64(pondID),
+      Args.u64(BigInt(pondID)),
       Args.address(playerAddress.roochAddress)
     ],
   });
@@ -16,7 +16,7 @@ const queryUserFishs = async (client: RoochClient, pondID: number, playerAddress
   return { data };
 };
 
-export function usePlayerState(pondID: number,) {
+export function usePlayerState(pondID: number) {
   const currentAddress = useCurrentAddress();
   const client = useRoochClient();
 
@@ -29,6 +29,6 @@ export function usePlayerState(pondID: number,) {
 
   //console.log("usePlayerState data:", data);
 
-  const fish_ids = data?.data?.return_values[0].decoded_value
+  const fish_ids = (data?.data?.return_values?.[0]?.decoded_value ?? null) as Array<number>;
   return { fish_ids };
 }

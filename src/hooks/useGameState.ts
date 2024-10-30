@@ -32,7 +32,7 @@ export function useGameState() {
     { refetchInterval: 3000 }
   );
 
-  const pondHandleId = gameState?.[0]?.decoded_value?.value?.ponds?.value?.handle?.value?.id;
+  const pondHandleId = (gameState as any)?.[0]?.decoded_value?.value?.ponds?.value?.handle?.value?.id;
 
   const { data: pondsData } = useQuery({
     queryKey: ["listFieldStates", pondHandleId],

@@ -7,7 +7,7 @@ export const listFieldStates = async (client: RoochClient, object_id: string) =>
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
-        const data = await client.transport.request({
+        const data = await (client as any).transport.request({
           method: 'rooch_listFieldStates',
           params: [
             object_id, 

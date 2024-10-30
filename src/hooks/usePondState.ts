@@ -1,11 +1,11 @@
-import { config } from "../config/index";
+import { config, PondID } from "../config/index";
 import { useRoochClientQuery } from "@roochnetwork/rooch-sdk-kit";
 import { transformObject } from "../utils/rooch_object";
 import { useQuery } from "@tanstack/react-query";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
 import { listFieldStates } from "../utils/index"
 
-export function usePondState(pondID: number) {
+export function usePondState(pondID: PondID) {
   const client = useRoochClient();
 
   const { data, refetch: roochFishRefetch } = useRoochClientQuery(

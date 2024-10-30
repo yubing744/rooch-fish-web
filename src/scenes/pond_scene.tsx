@@ -44,8 +44,8 @@ export const PondScene = () => {
     const blur = new BlurFilter(2);
     const colorMatrix = new ColorMatrixFilter();
     
-    colorMatrix.brightness(1.1);
-    colorMatrix.tint(0x4FA4FF, 0.2);
+    colorMatrix.brightness(1.1, true);
+    //colorMatrix.tint(0x4FA4FF, 0.2);
     
     return [blur, colorMatrix];
   }, []);
@@ -86,7 +86,7 @@ export const PondScene = () => {
         function: "purchase_fish",
         args: [
           Args.objectId(config.gameStateObjectID),
-          Args.u64(0), // pond_id 
+          Args.u64(BigInt(0)), // pond_id 
         ],
       });
   

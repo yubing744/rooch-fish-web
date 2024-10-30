@@ -13,6 +13,8 @@ export const config = {
   }
 }
 
+export type PondID = keyof typeof config.ponds;
+
 /*
     0x6d655fbbfa3458f7968c6779fb32233489bd53c13cca5611f56e6d2f0ec76174::pond
     0x6d655fbbfa3458f7968c6779fb32233489bd53c13cca5611f56e6d2f0ec76174::fish

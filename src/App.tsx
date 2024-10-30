@@ -329,7 +329,7 @@ function App() {
           </Stack>
         </Drawer>
         <Main open={showLeaderboard}>
-          <PondScene width={800} height={600} />
+          <PondScene />
         </Main>
       </Stack>
     </Stack>

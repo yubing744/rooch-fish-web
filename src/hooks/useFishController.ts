@@ -48,15 +48,15 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
         function: "move_fish",
         args: [
           Args.objectId(config.gameStateObjectID),
-          Args.u64(pondID),
-          Args.u64(fishID),
+          Args.u64(BigInt(pondID)),
+          Args.u64(BigInt(fishID)),
           Args.u8(direction),
         ],
       });
   
       const tx = await signAndExecuteTransaction({ transaction: txn });
-      if (tx.output.status.type != 'executed') {
-        const errorMsg = `Move failed: ${tx.output.status.type}`;
+      if (tx?.output?.status?.type != 'executed') {
+        const errorMsg = `Move failed: ${tx?.output?.status?.type}`;
         console.error("move fish fail:", errorMsg);
         enqueueSnackbar(errorMsg, { 
           variant: "warning" 
