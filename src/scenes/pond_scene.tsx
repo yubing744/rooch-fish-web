@@ -18,6 +18,7 @@ import { ExitZone } from '../types/index';
 const RedColor = 0xFF6B6B
 const BlueColor = 0x0000FF
 const YellowColor = 0xFFFF00
+const GreenColor = 0x00FF00
 
 export const PondScene = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -269,7 +270,7 @@ export const PondScene = () => {
                       key={`exit-zone-${index}`}
                       draw={g => {
                         g.clear();
-                        g.beginFill(RedColor, 0.3);
+                        g.beginFill(GreenColor, 0.3);
                         g.drawCircle(
                           40 + zone.x * scale,
                           40 + zone.y * scale,
