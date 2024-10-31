@@ -12,8 +12,12 @@ const extractObjectIds = (data: any[]) => {
       return null;
     }
 
+    const name = item.state.decoded_value.value.name
     const id = item.state.decoded_value.value.value.value.id;
-    return id;
+    return {
+      name,
+      id,
+    };
   }).filter(Boolean); // Remove null values
 
   return items;
@@ -39,6 +43,8 @@ export function useGameState() {
     queryFn: async () => pondHandleId ? listFieldStates(client, pondHandleId) : null,
     enabled: !!pondHandleId,
   });
+
+  //console.log("pondsData:", pondsData)
 
   const finalGameState = gameState ? {
     ...gameState,

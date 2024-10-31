@@ -29,7 +29,7 @@ export const PondScene = () => {
   const width = 800;
   const height = 800;
 
-  //console.log("foodData:", foodData)
+  //console.log("pondState:", pondState)
 
   const scale = useMemo(() => {
     if (!pondState) return 1;
@@ -128,7 +128,7 @@ export const PondScene = () => {
         args: [
           Args.objectId(config.gameStateObjectID),
           Args.u64(BigInt(0)), // pond_id
-          Args.u256(BigInt(100000000)), // 1RGas
+          Args.u64(BigInt(10)), // count
         ],
       });
 
@@ -163,7 +163,7 @@ export const PondScene = () => {
             disabled={feedLoading}
             sx={{ mr: 2 }}
           >
-            {feedLoading ? 'Feeding...' : 'Feed Pond (0.1 RGas)'}
+            {feedLoading ? 'Feeding...' : 'Feed 10 food'}
           </Button>
         </Toolbar>
       </AppBar>
@@ -204,7 +204,7 @@ export const PondScene = () => {
                         x={40 + fishState.x * scale} 
                         y={40 + fishState.y * scale} 
                         rotation={0}
-                        scale={fishState.size / 20} 
+                        scale={fishState.size / 7} 
                         color={playerFirstFish?.id == fishState.id ? BlueColor : RedColor}
                       />
                   ))}
@@ -214,7 +214,7 @@ export const PondScene = () => {
                       key={`food-${index}`}
                       x={40 + food.x * scale}
                       y={40 + food.y * scale}
-                      size={food.size * scale}
+                      size={food.size * scale / 2}
                       color={YellowColor}
                     />
                   ))}

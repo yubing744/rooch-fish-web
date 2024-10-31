@@ -320,7 +320,7 @@ function App() {
                       {fNumber(
                         Number(
                           (item.decoded_value?.value.balance as any).value.value
-                        )
+                        ),8
                       )}
                     </Typography>
                   </Stack>

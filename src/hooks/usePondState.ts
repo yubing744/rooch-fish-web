@@ -21,7 +21,7 @@ export function usePondState(pondID: PondID) {
 
   const pondData = transformObject(data?data[0]:null)
 
-  const fishTableHandleId = pondData?.fishes?.contents?.handle?.id;
+  const fishTableHandleId = pondData?.fishes?.handle?.id;
   const { data: fishData } = useQuery({
     queryKey: ["listFieldStates", fishTableHandleId],
     queryFn: async () => fishTableHandleId ? listFieldStates(client, fishTableHandleId) : null,
@@ -32,7 +32,7 @@ export function usePondState(pondID: PondID) {
   // console.log("🚀 fish data:", fishData);
 
   
-  const foodTableHandleId = pondData?.foods?.contents?.handle?.id;
+  const foodTableHandleId = pondData?.foods?.handle?.id;
   const { data: foodData } = useQuery({
     queryKey: ["listFieldStates", foodTableHandleId],
     queryFn: async () => foodTableHandleId ? listFieldStates(client, foodTableHandleId) : null,
