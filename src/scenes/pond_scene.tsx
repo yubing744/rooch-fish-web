@@ -13,7 +13,7 @@ import { useFishController } from '../hooks/useFishController';
 import { usePondState } from '../hooks/usePondState';
 import { usePlayerState } from '../hooks/usePlayerState';
 import { config } from "../config/index";
-
+import { ExitZone } from '../types/index';
 
 const RedColor = 0xFF6B6B
 const BlueColor = 0x0000FF
@@ -23,6 +23,7 @@ export const PondScene = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
+  const [exitLoading, setExitLoading] = useState(false);
   const { data: pondState, fishData, foodData } = usePondState(0);
   const { fish_ids } = usePlayerState(0)
   
@@ -152,6 +153,60 @@ export const PondScene = () => {
     }
   };
 
+  const isInExitZone = (fishX: number, fishY: number): boolean => {
+    if (!pondState?.exit_zones) return false;
+    
+    return pondState.exit_zones.some((zone: ExitZone) => {
+      const distance = Math.sqrt(
+        Math.pow(fishX - zone.x, 2) + 
+        Math.pow(fishY - zone.y, 2)
+      );
+      return distance <= zone.radius;
+    });
+  };
+  
+  const handleExitPond = async () => {
+    if (!playerFirstFish) return;
+    
+    if (!isInExitZone(playerFirstFish.x, playerFirstFish.y)) {
+      enqueueSnackbar("Fish must be in an exit zone to leave the pond", { 
+        variant: "warning" 
+      });
+      return;
+    }
+  
+    try {
+      setExitLoading(true);
+      const txn = new Transaction();
+      txn.callFunction({
+        address: config.roochFishAddress,
+        module: "rooch_fish",
+        function: "destroy_fish",
+        args: [
+          Args.objectId(config.gameStateObjectID),
+          Args.u64(BigInt(0)), // pond_id
+          Args.u64(BigInt(playerFirstFish.id)),
+        ],
+      });
+  
+      const tx = await signAndExecuteTransaction({ transaction: txn });
+      if (tx?.output?.status?.type != 'executed') {
+        throw new Error(`Exit failed: ${tx?.output?.status?.type}`);
+      }
+  
+      enqueueSnackbar("Successfully exited the pond!", { 
+        variant: "success" 
+      });
+    } catch (error) {
+      console.error(String(error));
+      enqueueSnackbar(String(error), { 
+        variant: "error" 
+      });
+    } finally {
+      setExitLoading(false);
+    }
+  };
+
   return (
     <Box>
       <AppBar position="static" color="transparent" elevation={0} sx={{ mb: 2 }}>
@@ -165,6 +220,17 @@ export const PondScene = () => {
           >
             {feedLoading ? 'Feeding...' : 'Feed 10 food'}
           </Button>
+
+          {playerFirstFish && (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleExitPond}
+              disabled={exitLoading}
+            >
+              {exitLoading ? 'Exiting...' : 'Exit Pond'}
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -198,6 +264,22 @@ export const PondScene = () => {
 
             <Container name="fishContainer" x={20} y={20} width={2000} height={2000}>
               <>
+                {pondState?.exit_zones?.map((zone: ExitZone, index: number) => (
+                    <Graphics
+                      key={`exit-zone-${index}`}
+                      draw={g => {
+                        g.clear();
+                        g.beginFill(RedColor, 0.3);
+                        g.drawCircle(
+                          40 + zone.x * scale,
+                          40 + zone.y * scale,
+                          zone.radius * scale / 2
+                        );
+                        g.endFill();
+                      }}
+                    />
+                  ))}
+
                   {fishData && fishData.map((fishState: any, index: number) => (
                       <Fish 
                         key={`fish-${index}`}
