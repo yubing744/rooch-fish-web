@@ -3,7 +3,7 @@ import { useMemo, useCallback } from 'react';
 import * as PIXI from 'pixi.js';
 
 interface FishProps {
-  x: number;
+  x: number; 
   y: number;
   scale?: number;
   rotation?: number;
@@ -16,16 +16,16 @@ export const Fish = ({ x, y, scale = 1, rotation = 0, color = 0xFF6B6B}: FishPro
     g.lineStyle(2, 0x000000, 1);
     g.beginFill(color);
     
-    // Body
-    g.moveTo(0, 0);
-    g.bezierCurveTo(10, -15, 40, -15, 50, 0);
-    g.bezierCurveTo(40, 15, 10, 15, 0, 0);
+    // Body starts at center (0,0)
+    g.moveTo(-25, 0);
+    g.bezierCurveTo(-15, -15, 15, -15, 25, 0); 
+    g.bezierCurveTo(15, 15, -15, 15, -25, 0);
     
-    // Tail
-    g.moveTo(-5, 0);
-    g.lineTo(-15, -10);
-    g.lineTo(-15, 10);
-    g.lineTo(-5, 0);
+    // Tail starts at left of body
+    g.moveTo(-25, 0);
+    g.lineTo(-35, -10);
+    g.lineTo(-35, 10);
+    g.lineTo(-25, 0);
     
     g.endFill();
   }, [color]);
