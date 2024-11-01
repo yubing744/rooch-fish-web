@@ -27,6 +27,7 @@ import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
 import { PondScene } from './scenes/pond_scene';
 import { useGameState } from './hooks/useGameState';
+import { useLatestTransaction } from "./hooks/useLatestTransaction";
 
 function getNextRewardClick(currentClicks: number): number {
   const remainder = currentClicks % 21;
@@ -108,6 +109,9 @@ function App() {
   const { rccOwnerList } = useRccOwner();
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+
+  const { tx } = useLatestTransaction();
+  console.log("tx:", tx);
 
   const { data: roochFishGameState } = useGameState();
   console.log("game-state:", roochFishGameState);
