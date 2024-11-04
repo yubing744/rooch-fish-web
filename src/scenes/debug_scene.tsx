@@ -1,172 +1,121 @@
 import { Container, Graphics, Stage } from '@pixi/react';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
-import { Box, Button, Paper, Typography, Grid,  AppBar, Toolbar } from '@mui/material';
+import { Box, Button, Paper, Typography, Grid, AppBar, Toolbar } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { Args, Transaction } from "@roochnetwork/rooch-sdk";
-import {
-  UseSignAndExecuteTransaction,
-} from "@roochnetwork/rooch-sdk-kit";
-import { useFishController } from '../hooks/useFishController';
 import { usePondState } from '../hooks/usePondState';
-import { usePlayerState } from '../hooks/usePlayerState';
-import { config } from "../config/index";
-import { ExitZone } from '../types/index';
 
 export const DebugScene = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
-  const { data: pondState, fishData, foodData } = usePondState(0);
-  //const { fish_ids } = usePlayerState(0)
-  const fish_ids = new Array<number>();
+  const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const wsRef = useRef<WebSocket | null>(null);
+  const requestIdRef = useRef(0);
+  //const { data: pondState, fishData, foodData } = usePondState(0);
 
-  const width = 800;
-  const height = 800;
+  const testWebSocket = () => {
+    try {
+      setWsStatus('connecting');
+      const ws = new WebSocket('wss://test-seed.rooch.network/'); // 替换成你的 WebSocket 地址
+      wsRef.current = ws;
 
-  console.log("pondState:", pondState)
+      ws.onopen = () => {
+        setWsStatus('connected');
+        enqueueSnackbar('WebSocket connected successfully!', { variant: 'success' });
+        // 发送测试消息
+        ws.send('Hello Server!');
+      };
+
+      ws.onmessage = (event) => {
+        enqueueSnackbar(`Received message: ${event.data}`, { variant: 'info' });
+      };
+
+      ws.onerror = (error) => {
+        setWsStatus('disconnected');
+        enqueueSnackbar('WebSocket connection error!', { variant: 'error' });
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        setWsStatus('disconnected');
+        wsRef.current = null;
+        enqueueSnackbar('WebSocket connection closed', { variant: 'warning' });
+      };
+
+    } catch (error) {
+      setWsStatus('disconnected');
+      wsRef.current = null;
+      enqueueSnackbar(`WebSocket error: ${error.message}`, { variant: 'error' });
+    }
+  };
+
+  const closeWebSocket = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.close();
+      wsRef.current = null;
+      setWsStatus('disconnected');
+    }
+  };
 
   /*
-  const boundaries = useMemo(() => ({
-    minX: 40,
-    maxX: width - 80,
-    minY: 40,
-    maxY: height - 80
-  }), [width, height]);
-
-  const playerFirstFish = useMemo(() => {
-    if (!fish_ids || !fishData || fish_ids.length === 0) return null;
-    return fishData.find((fish: any) => fish.id === fish_ids[0]);
-  }, [fish_ids, fishData]);
-
-  useFishController(0, playerFirstFish ? parseInt(playerFirstFish.id) : 0, 100, 100, boundaries);
-
-  const { mutateAsync: signAndExecuteTransaction } =
-      UseSignAndExecuteTransaction();
-
-  const handlePurchaseFish = async () => {
-    try {
-      setPurchaseLoading(true);
-      const txn = new Transaction();
-      txn.callFunction({
-        address: config.roochFishAddress,
-        module: "rooch_fish", 
-        function: "purchase_fish",
-        args: [
-          Args.objectId(config.gameStateObjectID),
-          Args.u64(BigInt(0)), // pond_id 
-        ],
-      });
-  
-      await signAndExecuteTransaction({ transaction: txn });
-      setPurchaseLoading(false);
-    } catch (error) {
-      console.error(String(error));
-
-      if (String(error).includes("1004")) {
-        enqueueSnackbar("Insufficient gas, please claim gas first", { 
-          variant: "warning" 
-        });
-      } else {
-        enqueueSnackbar(String(error), {
-          variant: "warning"
-        });
-      }
-    } finally {
-      setPurchaseLoading(false);
+    {
+        "jsonrpc": "2.0",
+        "id": 10,
+        "method": "rooch_syncStates",
+        "params": [
+            {
+                "object_i_d": "0x331bc3f86328ed93a71dca803349df9a7b44ef4c697c9522a0f70ece05381bbc"
+            },
+            "89209125",
+            "100",
+            {
+                "decode": true,
+                "descending": false
+            }
+        ]
     }
-  };
-
-  const handleFeedPond = async () => {
-    try {
-      setFeedLoading(true);
-      const txn = new Transaction();
-      txn.callFunction({
-        address: config.roochFishAddress,
-        module: "rooch_fish",
-        function: "feed_food",
-        args: [
-          Args.objectId(config.gameStateObjectID),
-          Args.u64(BigInt(0)), // pond_id
-          Args.u64(BigInt(10)), // count
-        ],
-      });
-
-      const tx = await signAndExecuteTransaction({ transaction: txn });
-      if (tx?.output?.status?.type != 'executed') {
-        const errorMsg = `Feed food failed: ${tx?.output?.status?.type}`;
-        console.error("Feed food fail:", errorMsg);
-        enqueueSnackbar(errorMsg, { 
-          variant: "warning" 
-        });
-        return;
-      }
-
-      console.log("Feed food success!")
-      enqueueSnackbar("Successfully fed the pond!", { variant: "success" });
-    } catch (error) {
-      console.error(String(error));
-      enqueueSnackbar(String(error), { variant: "error" });
-    } finally {
-      setFeedLoading(false);
-    }
-  };
-
-  const isInExitZone = (fishX: number, fishY: number): boolean => {
-    if (!pondState?.exit_zones) return false;
-    
-    return pondState.exit_zones.some((zone: ExitZone) => {
-      const distance = Math.sqrt(
-        Math.pow(fishX - zone.x, 2) + 
-        Math.pow(fishY - zone.y, 2)
-      );
-      return distance <= zone.radius;
-    });
-  };
-  
-  const handleExitPond = async () => {
-    if (!playerFirstFish) return;
-    
-    if (!isInExitZone(playerFirstFish.x, playerFirstFish.y)) {
-      enqueueSnackbar("Fish must be in an exit zone to leave the pond", { 
-        variant: "warning" 
-      });
+  */
+  const sendSyncStatesRequest = () => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      enqueueSnackbar('WebSocket not connected!', { variant: 'error' });
       return;
     }
-  
+
+    const request = {
+      jsonrpc: "2.0",
+      id: requestIdRef.current++,
+      method: "rooch_syncStates",
+      params: [
+        {
+            "object_i_d": "0x331bc3f86328ed93a71dca803349df9a7b44ef4c697c9522a0f70ece05381bbc"
+        },
+        "89209125",
+        "100",
+        {
+            "decode": true,
+            "descending": false
+        }
+      ]
+    };
+
     try {
-      setExitLoading(true);
-      const txn = new Transaction();
-      txn.callFunction({
-        address: config.roochFishAddress,
-        module: "rooch_fish",
-        function: "destroy_fish",
-        args: [
-          Args.objectId(config.gameStateObjectID),
-          Args.u64(BigInt(0)), // pond_id
-          Args.u64(BigInt(playerFirstFish.id)),
-        ],
-      });
-  
-      const tx = await signAndExecuteTransaction({ transaction: txn });
-      if (tx?.output?.status?.type != 'executed') {
-        throw new Error(`Exit failed: ${tx?.output?.status?.type}`);
-      }
-  
-      enqueueSnackbar("Successfully exited the pond!", { 
-        variant: "success" 
-      });
+      wsRef.current.send(JSON.stringify(request));
+      enqueueSnackbar('Sync states request sent!', { variant: 'success' });
     } catch (error) {
-      console.error(String(error));
-      enqueueSnackbar(String(error), { 
-        variant: "error" 
-      });
-    } finally {
-      setExitLoading(false);
+      enqueueSnackbar(`Failed to send request: ${error.message}`, { variant: 'error' });
     }
   };
-  */
+
+  // 组件卸载时关闭连接
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   return (
     <Box>
@@ -175,20 +124,33 @@ export const DebugScene = () => {
           <Button
             variant="contained"
             color="primary"
-            disabled={feedLoading}
+            disabled={wsStatus === 'connecting' || wsStatus === 'connected'}
+            onClick={testWebSocket}
             sx={{ mr: 2 }}
           >
-            Buy Fish
+            {wsStatus === 'connecting' ? 'Connecting...' : 'Connect WebSocket'}
           </Button>
-
           <Button
             variant="contained"
-            color="primary"
-            disabled={feedLoading}
+            color="secondary"
+            disabled={wsStatus !== 'connected'}
+            onClick={closeWebSocket}
             sx={{ mr: 2 }}
           >
-            {feedLoading ? 'Feeding...' : 'Feed 10 food'}
+            Disconnect WebSocket
           </Button>
+          <Button
+            variant="contained"
+            color="info"
+            disabled={wsStatus !== 'connected'}
+            onClick={sendSyncStatesRequest}
+            sx={{ mr: 2 }}
+          >
+            Sync States
+          </Button>
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+            Status: {wsStatus}
+          </Typography>
         </Toolbar>
       </AppBar>
     </Box>
