@@ -65,7 +65,7 @@ export const syncStates = async (client: RoochClient, object_id: string, txOrder
           ],
         }) as any;
 
-        //console.log("🚀 ~ file: listFieldStates ~ data:", data);
+        console.log("🚀 ~ file: listFieldStates ~ data:", data);
         
         if (!data) {
           throw new Error('No data returned from listFieldStates request');
@@ -106,7 +106,7 @@ export const getTransactionsByOrder = async (client: RoochClient, cursor: number
           ],
         }) as any;
 
-        //console.log("🚀 ~ file: listFieldStates ~ data:", data);
+        console.log("🚀 ~ file: listFieldStates ~ data:", data);
         
         if (!data) {
           throw new Error('No data returned from listFieldStates request');

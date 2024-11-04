@@ -18,55 +18,9 @@ export function usePondState(pondID: PondID) {
 
   const pondData = transformObject(data?data[0]:null)
 
-  const fishTableHandleId = pondData?.fishes?.handle?.id;
-  const { data: fishData } = useQuery({
-    queryKey: ["listFieldStates", fishTableHandleId],
-    queryFn: async () => fishTableHandleId ? listFieldStates(client, fishTableHandleId) : null,
-    enabled: !!fishTableHandleId,
-    refetchInterval: 500,
-  });
-
-  console.log("🚀 usePondState txOrder:", txOrder);
-
-  const foodTableHandleId = pondData?.foods?.handle?.id;
-  const { data: foodData } = useQuery({
-    queryKey: ["listFieldStates", foodTableHandleId],
-    queryFn: async () => foodTableHandleId ? listFieldStates(client, foodTableHandleId) : null,
-    enabled: !!foodTableHandleId,
-    refetchInterval: 5000,
-  });
-
-  //console.log("🚀 food data:", foodData);
-
-  const finalFishData = transformFish(fishData);
-  const finalFoodData = transformFood(foodData);
-
   const finalPondState = pondData ? {
     ...pondData,
   } : null;
 
-  /*
-  finalFishData && finalFishData.map((fishState: any, index: number) => {
-    console.log(`Fish ${index} position:`, fishState.x, fishState.y);
-  })
-  */
-
-  return { data: finalPondState, fishData: finalFishData, foodData: finalFoodData};
-}
-
-function transformFish(data: any): any {
-   const fishData = transformObject(data)
-   return fishData ? Array.from(fishData.result).map((item: any)=>{
-     return item.state
-   }): []
-}
-
-function transformFood(data: any): any {
-  const foodData = transformObject(data)
-
-  //console.log("🚀 fish data:", foodData);
-
-  return foodData ? Array.from(foodData?.result).map((item: any)=>{
-    return item.state
-  }) : []
+  return { data: finalPondState, fishData: [], foodData: []};
 }

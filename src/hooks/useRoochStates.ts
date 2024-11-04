@@ -9,6 +9,7 @@ export function useRoochState(objectID: string, opts: any) {
   const { data: latestTxData } = useQuery({
     queryKey: ["rooch_latest_tx"],
     queryFn: async () => getTransactionsByOrder(client, null, 1, true),
+    refetchInterval: opts.refetchInterval,
   });
 
   const stateRoot = latestTxData?.result?.[0]?.execution_info?.state_root;
