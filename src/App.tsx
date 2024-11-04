@@ -111,9 +111,6 @@ function App() {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  const { tx } = useLatestTransaction();
-  console.log("tx:", tx);
-
   const { data: roochFishGameState } = useGameState();
   console.log("game-state:", roochFishGameState);
 

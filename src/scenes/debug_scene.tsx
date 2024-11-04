@@ -19,13 +19,15 @@ export const DebugScene = () => {
   const [feedLoading, setFeedLoading] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
   const { data: pondState, fishData, foodData } = usePondState(0);
-  const { fish_ids } = usePlayerState(0)
-  
+  //const { fish_ids } = usePlayerState(0)
+  const fish_ids = new Array<number>();
+
   const width = 800;
   const height = 800;
 
-  //console.log("pondState:", pondState)
+  console.log("pondState:", pondState)
 
+  /*
   const boundaries = useMemo(() => ({
     minX: 40,
     maxX: width - 80,
@@ -164,6 +166,7 @@ export const DebugScene = () => {
       setExitLoading(false);
     }
   };
+  */
 
   return (
     <Box>
@@ -172,7 +175,6 @@ export const DebugScene = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handlePurchaseFish}
             disabled={feedLoading}
             sx={{ mr: 2 }}
           >
@@ -182,23 +184,11 @@ export const DebugScene = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleFeedPond}
             disabled={feedLoading}
             sx={{ mr: 2 }}
           >
             {feedLoading ? 'Feeding...' : 'Feed 10 food'}
           </Button>
-
-          {playerFirstFish && (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={handleExitPond}
-              disabled={exitLoading}
-            >
-              {exitLoading ? 'Exiting...' : 'Exit Pond'}
-            </Button>
-          )}
         </Toolbar>
       </AppBar>
     </Box>

@@ -53,19 +53,21 @@ export const syncStates = async (client: RoochClient, object_id: string, txOrder
     while (true) {
       try {
         const data = await (client as any).transport.request({
-          method: 'rooch_synchStates',
+          method: 'rooch_syncStates',
           params: [
-            object_id, 
-            cursor, 
+            {
+              object_i_d: object_id,
+            }, 
+            txOrder, 
             "100", 
             {
               decode: true,
-              stateRoot: txOrder,
+              descending: false,
             },
           ],
         }) as any;
 
-        console.log("🚀 ~ file: listFieldStates ~ data:", data);
+        //console.log("🚀 ~ file: listFieldStates ~ data:", data);
         
         if (!data) {
           throw new Error('No data returned from listFieldStates request');
@@ -106,7 +108,7 @@ export const getTransactionsByOrder = async (client: RoochClient, cursor: number
           ],
         }) as any;
 
-        console.log("🚀 ~ file: listFieldStates ~ data:", data);
+        //console.log("🚀 ~ file: listFieldStates ~ data:", data);
         
         if (!data) {
           throw new Error('No data returned from listFieldStates request');
