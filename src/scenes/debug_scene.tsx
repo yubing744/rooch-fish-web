@@ -1,7 +1,9 @@
+import { Buffer } from 'buffer';
 import { Container, Graphics, Stage } from '@pixi/react';
 import { useMemo, useEffect, useState, useRef } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
 import { Box, Button, Paper, Typography, Grid, AppBar, Toolbar } from '@mui/material';
+import { bcs } from "@roochnetwork/rooch-sdk";
 import { useSnackbar } from 'notistack';
 import { usePondState } from '../hooks/usePondState';
 
@@ -14,6 +16,10 @@ export const DebugScene = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const requestIdRef = useRef(0);
   const { data: pondState, fishData, foodData } = usePondState(0);
+
+  console.log("pondState:", pondState);
+  console.log("fishData:", fishData);
+  console.log("foodData:", foodData);
 
   const testWebSocket = () => {
     try {
@@ -115,6 +121,35 @@ export const DebugScene = () => {
     };
   }, []);
 
+  const testBcsDeserialization = () => {
+    try {
+      // 定义Fish结构
+      const Fish = bcs.struct('Fish', {
+        id: bcs.u64(),
+        owner: bcs.Address, // Move address是32字节
+        size: bcs.u64(),
+        x: bcs.u64(),
+        y: bcs.u64(),
+      });
+
+      // 定义DynamicField结构
+      const DynamicField = bcs.struct('DynamicField', {
+        name: bcs.u64(),
+        value: Fish,
+      });
+
+      const hexString = "09000000000000000900000000000000583c31fe2f5a549538f7fc039bf1569af1e20a45f159b11472a18a641549effd0c0000000000000015000000000000000c00000000000000";
+      const buffer = Buffer.from(hexString, "hex");
+      const deserializedData = DynamicField.parse(buffer);
+      console.log("deserializedData:", deserializedData)
+    } catch (error) {
+      console.error('BCS deserialization error:', error);
+      enqueueSnackbar(`BCS deserialization failed: ${error.message}`, { 
+        variant: 'error' 
+      });
+    }
+  };
+
   return (
     <Box>
       <AppBar position="static" color="transparent" elevation={0} sx={{ mb: 2 }}>
@@ -145,6 +180,14 @@ export const DebugScene = () => {
             sx={{ mr: 2 }}
           >
             Sync States
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={testBcsDeserialization}
+            sx={{ mr: 2 }}
+          >
+            Test BCS Deserialization
           </Button>
           <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
             Status: {wsStatus}

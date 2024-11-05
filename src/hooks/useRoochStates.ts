@@ -13,7 +13,7 @@ export function useRoochState(objectID: string, opts: any) {
     refetchInterval: opts.refetchInterval,
   });
 
-  console.log("useRoochState latestTxData:", latestTxData)
+  //console.log("useRoochState latestTxData:", latestTxData)
 
   const stateRoot = latestTxData?.execution_info?.state_root;
   const txOrder = latestTxData?.transaction?.sequence_info.tx_order;

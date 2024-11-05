@@ -1,5 +1,5 @@
 export const config = {
-  debug: true,
+  debug: false,
   roochFishAddress: "0xa705977b6baa5eb91498881f4acf116d1ae4ddcff2cc2d117f71aae01a4a4565",
   gameStateObjectID: "0x819cb0a3da6193b8c676a99d2b6ecfc60e778af684f528e08dcd3e6fe89f454c",
   ponds: {
