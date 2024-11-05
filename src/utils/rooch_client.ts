@@ -126,9 +126,33 @@ export const getTransactionsByOrder = async (client: RoochClient, cursor: number
       }
     }
 
-    return { result };
+    return { result, cursor };
   } catch (error) {
     console.error('Fatal error in listFieldStates:', error);
     throw error; // Re-throw to be handled by React Query's error handling
   }
 };
+
+export const getLatestTransaction = async (client: RoochClient) => {
+  try {
+    let cursor = null;
+
+    while (true) {
+      const resp = await getTransactionsByOrder(client, cursor, 100, true)
+      //console.log("getLatestTransaction resp:", resp)
+      const txs = Array.from(resp.result || []).filter((item) => item.execution_info !== null);
+      cursor = resp.cursor;
+
+      if (txs.length > 0) {
+       return txs[0]
+      }
+
+      // Sleep for 1 second using Promise
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  } catch (error) {
+    console.error('Fatal error in getLatestTransaction:', error);
+    throw error; // Re-throw to be handled by React Query's error handling
+  }
+};
+

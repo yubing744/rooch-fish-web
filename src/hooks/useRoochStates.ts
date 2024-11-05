@@ -1,19 +1,22 @@
 import { useRoochClientQuery } from "@roochnetwork/rooch-sdk-kit";
 import { useQuery } from "@tanstack/react-query";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
-import { getTransactionsByOrder } from "../utils/rooch_client"
+import { getLatestTransaction } from "../utils/rooch_client"
 
 export function useRoochState(objectID: string, opts: any) {
   const client = useRoochClient();
 
   const { data: latestTxData } = useQuery({
-    queryKey: ["rooch_latest_tx"],
-    queryFn: async () => getTransactionsByOrder(client, null, 1, true),
+    queryKey: ["rooch_latest_tx_for_use_rooch_states"],
+    queryFn: async () => getLatestTransaction(client),
+    enabled: !!objectID,
     refetchInterval: opts.refetchInterval,
   });
 
-  const stateRoot = latestTxData?.result?.[0]?.execution_info?.state_root;
-  const txOrder = latestTxData?.result?.[0]?.transaction?.sequence_info.tx_order;
+  console.log("useRoochState latestTxData:", latestTxData)
+
+  const stateRoot = latestTxData?.execution_info?.state_root;
+  const txOrder = latestTxData?.transaction?.sequence_info.tx_order;
 
   const { data, refetch: refetch } = useRoochClientQuery(
     "getStates",

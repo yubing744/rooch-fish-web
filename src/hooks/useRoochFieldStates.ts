@@ -1,26 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
-import { getTransactionsByOrder } from "../utils/rooch_client"
+import { getLatestTransaction } from "../utils/rooch_client"
 import { listFieldStates, syncStates } from "../utils/index"
+import { useRoochWSClient } from "./useRoochWSClient"
 
 export function useRoochFieldStates(objectID: string, opts: any) {
-  const client = useRoochClient();
+  const client = useRoochWSClient();
   const [data, setData] = useState<Array<any>>([]); // Fix useState syntax
 
-
   const { data: latestTxData } = useQuery({
-    queryKey: ["rooch_latest_tx"],
-    queryFn: async () => getTransactionsByOrder(client, null, 1, true),
+    queryKey: ["rooch_latest_tx_for_use_rooch_field_states"],
+    queryFn: async () => getLatestTransaction(client),
     enabled: !!objectID,
     refetchInterval: 60000,
   });
 
   console.log("latestTxData:", latestTxData)
 
-
-  const stateRoot = latestTxData?.result?.[0]?.execution_info?.state_root;
-  const txOrder = latestTxData?.result?.[0]?.transaction?.sequence_info.tx_order;
+  const stateRoot = latestTxData?.execution_info?.state_root;
+  const txOrder = latestTxData?.transaction?.sequence_info.tx_order;
   const cursorRef = useRef(txOrder);
 
   useEffect(() => {
@@ -47,16 +45,18 @@ export function useRoochFieldStates(objectID: string, opts: any) {
 
     const fetchDiffData = async () => {
       try {
-        console.log("start fetchDiffData, txOrder:", cursorRef.current)
-
         const fieldStats = await syncStates(client, objectID, cursorRef.current);
         if (mounted && cursorRef.current) {
-          console.log("diffData:", fieldStats)
-
           for (const changeSet of fieldStats.result) {
             if (BigInt(changeSet.tx_order) > BigInt(cursorRef.current)) {
               cursorRef.current = changeSet.tx_order;
             }
+
+            if (changeSet.state_change_set.changes.length == 0) {
+              continue
+            }
+
+            console.log("diffData:", changeSet.state_change_set)
           }
           //setData(fieldStats?.result);
         }
@@ -67,7 +67,7 @@ export function useRoochFieldStates(objectID: string, opts: any) {
 
     fetchFullData();
 
-    const intervalId = setInterval(fetchDiffData, 5000); // Changed to 1s for better performance
+    const intervalId = setInterval(fetchDiffData, opts.refetchInterval); // Changed to 1s for better performance
 
     return () => {
       mounted = false;

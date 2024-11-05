@@ -21,7 +21,7 @@ export function usePondState(pondID: PondID) {
 
   const fishTableHandleId = pondData?.fishes?.handle?.id;
   const { data: fishData } = useRoochFieldStates(fishTableHandleId, {
-    refetchInterval: 5000
+    refetchInterval: 40
   })
 
   const finalPondState = pondData ? {

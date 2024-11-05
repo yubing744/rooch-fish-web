@@ -13,7 +13,7 @@ export const DebugScene = () => {
   const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const wsRef = useRef<WebSocket | null>(null);
   const requestIdRef = useRef(0);
-  //const { data: pondState, fishData, foodData } = usePondState(0);
+  const { data: pondState, fishData, foodData } = usePondState(0);
 
   const testWebSocket = () => {
     try {
@@ -88,9 +88,7 @@ export const DebugScene = () => {
       id: requestIdRef.current++,
       method: "rooch_syncStates",
       params: [
-        {
-            "object_i_d": "0x331bc3f86328ed93a71dca803349df9a7b44ef4c697c9522a0f70ece05381bbc"
-        },
+        "all",
         "89209125",
         "100",
         {
