@@ -59,7 +59,7 @@ export const syncStates = async (client: RoochClient, object_id: string, txOrder
               object_i_d: object_id,
             }, 
             txOrder, 
-            "100", 
+            "5", 
             {
               decode: true,
               descending: false,
@@ -85,7 +85,7 @@ export const syncStates = async (client: RoochClient, object_id: string, txOrder
       }
     }
 
-    return { result };
+    return { result, cursor };
   } catch (error) {
     console.error('Fatal error in listFieldStates:', error);
     throw error; // Re-throw to be handled by React Query's error handling
