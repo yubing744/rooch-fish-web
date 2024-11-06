@@ -1,10 +1,36 @@
 import { config, PondID } from "../config/index";
-import { useRoochClientQuery } from "@roochnetwork/rooch-sdk-kit";
 import { transformObject } from "../utils/rooch_object";
-import { useQuery } from "@tanstack/react-query";
+import { bcs } from "@roochnetwork/rooch-sdk";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
-import { listFieldStates } from "../utils/index"
 import { useRoochState } from "./useRoochStates"
+import { useRoochFieldStates } from "./useRoochFieldStates"
+import { useRoochWSFieldStates } from "./useRoochWSFieldStates"
+
+const Fish = bcs.struct('Fish', {
+  id: bcs.u64(),
+  owner: bcs.Address,
+  size: bcs.u64(),
+  x: bcs.u64(),
+  y: bcs.u64(),
+});
+
+const Food = bcs.struct('Food', {
+  id: bcs.u64(),
+  owner: bcs.Address,
+  size: bcs.u64(),
+  x: bcs.u64(),
+  y: bcs.u64(),
+});
+
+const FishDynamicField = bcs.struct('DynamicField', {
+  name: bcs.u64(),
+  value: Fish,
+});
+
+const FoodDynamicField = bcs.struct('DynamicField', {
+  name: bcs.u64(),
+  value: Food,
+});
 
 export function usePondState(pondID: PondID) {
   const client = useRoochClient();
@@ -12,61 +38,65 @@ export function usePondState(pondID: PondID) {
   const { data, txOrder, refetch: roochFishRefetch } = useRoochState(
     config.ponds[pondID],
     { 
-      refetchInterval: 20000,
+      refetchInterval: 60000,
     }
   );
 
   const pondData = transformObject(data?data[0]:null)
 
   const fishTableHandleId = pondData?.fishes?.handle?.id;
-  const { data: fishData } = useQuery({
-    queryKey: ["listFieldStates", fishTableHandleId],
-    queryFn: async () => fishTableHandleId ? listFieldStates(client, fishTableHandleId) : null,
-    enabled: !!fishTableHandleId,
-    refetchInterval: 500,
+  const foodTableHandleId = pondData?.foods?.handle?.id;
+
+  const { fields: fishData } = useRoochWSFieldStates(fishTableHandleId, FishDynamicField, {
+    refetchInterval: 400,
+    diffInterval: 40,
   });
 
-  console.log("🚀 usePondState txOrder:", txOrder);
-
-  const foodTableHandleId = pondData?.foods?.handle?.id;
-  const { data: foodData } = useQuery({
-    queryKey: ["listFieldStates", foodTableHandleId],
-    queryFn: async () => foodTableHandleId ? listFieldStates(client, foodTableHandleId) : null,
-    enabled: !!foodTableHandleId,
+  const { fields: foodData } = useRoochFieldStates(foodTableHandleId, FoodDynamicField, {
     refetchInterval: 5000,
   });
-
-  //console.log("🚀 food data:", foodData);
-
-  const finalFishData = transformFish(fishData);
-  const finalFoodData = transformFood(foodData);
 
   const finalPondState = pondData ? {
     ...pondData,
   } : null;
 
-  /*
-  finalFishData && finalFishData.map((fishState: any, index: number) => {
-    console.log(`Fish ${index} position:`, fishState.x, fishState.y);
-  })
-  */
-
-  return { data: finalPondState, fishData: finalFishData, foodData: finalFoodData};
+  const finalFishData = transformFish(fishData);
+  const finalFoodData = transformFood(foodData);
+  
+  return { 
+    data: finalPondState, 
+    fishData: finalFishData, 
+    foodData: finalFoodData
+  };
 }
 
-function transformFish(data: any): any {
-   const fishData = transformObject(data)
-   return fishData ? Array.from(fishData.result).map((item: any)=>{
-     return item.state
-   }): []
+function transformFish(fishData: Map<string, any>): Array<any> {
+  if (!fishData || !(fishData instanceof Map)) {
+    return [];
+  }
+
+  return Array.from(fishData.values()).map(field => {
+    return {
+      id: field.value.id,
+      owner: field.value.owner,
+      size: field.value.size,
+      x: field.value.x,
+      y: field.value.y
+    };
+  });
 }
 
-function transformFood(data: any): any {
-  const foodData = transformObject(data)
+function transformFood(foodData: Map<string, any>): Array<any> {
+  if (!foodData || !(foodData instanceof Map)) {
+    return [];
+  }
 
-  //console.log("🚀 fish data:", foodData);
-
-  return foodData ? Array.from(foodData?.result).map((item: any)=>{
-    return item.state
-  }) : []
+  return Array.from(foodData.values()).map(field => {
+    return {
+      id: field.value.id,
+      size: field.value.size,
+      x: field.value.x,
+      y: field.value.y
+    };
+  });
 }

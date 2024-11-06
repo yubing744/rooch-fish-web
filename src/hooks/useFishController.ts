@@ -1,10 +1,9 @@
 import { config } from "../config/index";
 import { useState, useEffect } from 'react';
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
-import {
-  UseSignAndExecuteTransaction,
-} from "@roochnetwork/rooch-sdk-kit";
 import { useSnackbar } from 'notistack';
+import { useSignAndExecuteTransaction } from "./useSignAndExecuteTransaction";
+
 interface FishState {
   x: number;
   y: number;
@@ -33,7 +32,7 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
   const { enqueueSnackbar } = useSnackbar();
 
   const { mutateAsync: signAndExecuteTransaction } =
-    UseSignAndExecuteTransaction();
+    useSignAndExecuteTransaction();
 
   const handleFishMove = async (direction: number) => {
     console.log("move fish start, with direction:", direction, "fish_id:", fishID)
@@ -66,7 +65,7 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
         return;
       }
 
-      console.log("move fish success, tx:", tx)
+      console.log("move fish success, tx:", tx, "tx_order:", tx.sequence_info.tx_order);
     } catch (error) {
       console.error("move fish error:", error);
 

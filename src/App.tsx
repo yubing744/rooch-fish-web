@@ -25,6 +25,7 @@ import CountUp from "react-countup";
 import "./App.css";
 import { useRccOwner } from "./hooks/useRccOwner";
 import { fNumber, shortAddress } from "./utils";
+import { DebugScene } from './scenes/debug_scene'
 import { PondScene } from './scenes/pond_scene';
 import { useGameState } from './hooks/useGameState';
 import { useLatestTransaction } from "./hooks/useLatestTransaction";
@@ -109,12 +110,6 @@ function App() {
   const { rccOwnerList } = useRccOwner();
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-
-  const { tx } = useLatestTransaction();
-  console.log("tx:", tx);
-
-  const { data: roochFishGameState } = useGameState();
-  console.log("game-state:", roochFishGameState);
 
   const { data: RCCBalance, refetch: refetchRCCBalance } = useRoochClientQuery(
     "getBalance",
@@ -333,7 +328,11 @@ function App() {
           </Stack>
         </Drawer>
         <Main open={showLeaderboard}>
-          <PondScene />
+          {config.debug ? (
+            <DebugScene />
+          ):(
+            <PondScene />
+          )}
         </Main>
       </Stack>
     </Stack>

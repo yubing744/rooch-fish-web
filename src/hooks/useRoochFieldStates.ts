@@ -1,57 +1,54 @@
-import { useState, useEffect } from "react";
+import { Buffer } from 'buffer';
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { listFieldStates } from "../utils/index";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
-import { getTransactionsByOrder } from "../utils/rooch_client"
-import { listFieldStates, syncStates } from "../utils/index"
+import { BcsType } from "@roochnetwork/rooch-sdk";
 
-export function useRoochFieldStates(objectID: string, opts: any) {
+export function useRoochFieldStates(
+  objectID: string, 
+  fieldBcsType: BcsType, 
+  opts: { refetchInterval: number }
+) {
   const client = useRoochClient();
-  const [data, setData] = useState<Array<any>>(); // Fix useState syntax
-
-  const { data: latestTxData } = useQuery({
-    queryKey: ["rooch_latest_tx"],
-    queryFn: async () => getTransactionsByOrder(client, null, 1, true),
+  const [fields, setFields] = useState<Map<string, any>>(new Map<string, any>);
+  
+  const { data: fieldStats } = useQuery({
+    queryKey: ["listFieldStates"],
+    queryFn: async () => listFieldStates(client, objectID),
+    enabled: !!objectID,
+    refetchInterval: opts.refetchInterval,
   });
 
-  const stateRoot = latestTxData?.result?.[0]?.execution_info?.state_root;
-  const txOrder = latestTxData?.result?.[0]?.transaction?.sequence_info.tx_order;
+  const deserializeFieldState = (hexValue: string) => {
+    try {
+      const cleanHexValue = hexValue.startsWith('0x') ? hexValue.slice(2) : hexValue;
+      const buffer = Buffer.from(cleanHexValue, "hex");
+      return fieldBcsType.parse(buffer);
+    } catch (error) {
+      console.error('BCS deserialization error:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-
-    const fetchFullData = async () => {
-      try {
-        const fieldStats = await listFieldStates(client, objectID, stateRoot);
-        if (mounted) {
-          setData(fieldStats?.result);
+    if (fieldStats?.result) {
+      const newFields = new Map<string, any>();
+      
+      for (const item of fieldStats.result) {
+        if (item.state?.value) {
+          const deserializedValue = deserializeFieldState(item.state.value);
+          if (deserializedValue) {
+            newFields.set(item.field_key, deserializedValue);
+          }
         }
-      } catch (error) {
-        console.error("Error fetching field states:", error);
       }
-    };
+      
+      setFields(newFields);
+    }
+  }, [fieldStats]);
 
-    const fetchDiffData = async () => {
-      try {
-        const fieldStats = await syncStates(client, objectID, txOrder);
-        if (mounted) {
-          setData(fieldStats?.result);
-        }
-      } catch (error) {
-        console.error("Error fetching field states:", error);
-      }
-    };
-
-    fetchFullData();
-
-    const intervalId = setInterval(fetchDiffData, opts.refetchInterval); // Changed to 1s for better performance
-
-    return () => {
-      mounted = false;
-      clearInterval(intervalId);
-    };
-  }, [client, stateRoot, txOrder, objectID, opts]); // Added objectID to deps
-
-  return {
-    data: data,
+  return { 
+    fields: fields,
   };
 }
