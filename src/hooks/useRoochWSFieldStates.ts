@@ -8,7 +8,7 @@ import { BcsType } from "@roochnetwork/rooch-sdk";
 
 export function useRoochWSFieldStates(
   objectID: string, 
-  fieldBcsType: BcsType, 
+  fieldBcsType: BcsType<any, any>, 
   opts: { 
     refetchInterval: number,
     diffInterval: number

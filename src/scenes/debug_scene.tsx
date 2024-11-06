@@ -50,7 +50,7 @@ export const DebugScene = () => {
         enqueueSnackbar('WebSocket connection closed', { variant: 'warning' });
       };
 
-    } catch (error) {
+    } catch (error: any) {
       setWsStatus('disconnected');
       wsRef.current = null;
       enqueueSnackbar(`WebSocket error: ${error.message}`, { variant: 'error' });
@@ -107,7 +107,7 @@ export const DebugScene = () => {
     try {
       wsRef.current.send(JSON.stringify(request));
       enqueueSnackbar('Sync states request sent!', { variant: 'success' });
-    } catch (error) {
+    } catch (error: any) {
       enqueueSnackbar(`Failed to send request: ${error.message}`, { variant: 'error' });
     }
   };
@@ -142,7 +142,7 @@ export const DebugScene = () => {
       const buffer = Buffer.from(hexString, "hex");
       const deserializedData = DynamicField.parse(buffer);
       console.log("deserializedData:", deserializedData)
-    } catch (error) {
+    } catch (error: any) {
       console.error('BCS deserialization error:', error);
       enqueueSnackbar(`BCS deserialization failed: ${error.message}`, { 
         variant: 'error' 
