@@ -111,9 +111,6 @@ function App() {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
-  const { data: roochFishGameState } = useGameState();
-  console.log("game-state:", roochFishGameState);
-
   const { data: RCCBalance, refetch: refetchRCCBalance } = useRoochClientQuery(
     "getBalance",
     {

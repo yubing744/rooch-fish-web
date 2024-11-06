@@ -25,7 +25,7 @@ export function usePlayerState(pondID: number) {
   const { data } = useQuery({
     queryKey: ["query_user_fishs"],
     queryFn: async () => queryUserFishs(client, pondID, currentAddress),
-    refetchInterval: 500000 
+    refetchInterval: 5000 
   });
 
   //console.log("usePlayerState data:", data);

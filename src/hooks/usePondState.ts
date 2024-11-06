@@ -4,6 +4,7 @@ import { bcs } from "@roochnetwork/rooch-sdk";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
 import { useRoochState } from "./useRoochStates"
 import { useRoochFieldStates } from "./useRoochFieldStates"
+import { useRoochWSFieldStates } from "./useRoochWSFieldStates"
 
 const Fish = bcs.struct('Fish', {
   id: bcs.u64(),
@@ -15,6 +16,7 @@ const Fish = bcs.struct('Fish', {
 
 const Food = bcs.struct('Food', {
   id: bcs.u64(),
+  owner: bcs.Address,
   size: bcs.u64(),
   x: bcs.u64(),
   y: bcs.u64(),
@@ -45,12 +47,13 @@ export function usePondState(pondID: PondID) {
   const fishTableHandleId = pondData?.fishes?.handle?.id;
   const foodTableHandleId = pondData?.foods?.handle?.id;
 
-  const { fields: fishData } = useRoochFieldStates(fishTableHandleId, FishDynamicField, {
-    refetchInterval: 300
+  const { fields: fishData } = useRoochWSFieldStates(fishTableHandleId, FishDynamicField, {
+    refetchInterval: 400,
+    diffInterval: 40,
   });
 
   const { fields: foodData } = useRoochFieldStates(foodTableHandleId, FoodDynamicField, {
-    refetchInterval: 500
+    refetchInterval: 5000,
   });
 
   const finalPondState = pondData ? {
