@@ -25,7 +25,7 @@ export function useRoochState(objectID: string, opts: any) {
       stateOption: {
         decode: true,
         stateRoot: stateRoot
-      },
+      } as any,
     },
     { 
       enabled: !!stateRoot,
