@@ -31,7 +31,7 @@ export const PondScene = () => {
   const width = 800;
   const height = 800;
 
-  //console.log("pondState:", pondState)
+  //console.log("fishData:", fishData)
 
   const scale = useMemo(() => {
     if (!pondState) return 1;

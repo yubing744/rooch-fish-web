@@ -5,7 +5,7 @@ import { roochMutationKeys } from '../constants'
 import { UseMutationOptions, UseMutationResult, useMutation } from '@tanstack/react-query'
 import { Signer, Transaction, ExecuteTransactionResponseView } from '@roochnetwork/rooch-sdk'
 import { useCurrentSession, useRoochClient } from '@roochnetwork/rooch-sdk-kit'
-//import { useRoochWSClient } from "./useRoochWSClient";
+import { useRoochWSClient } from "./useRoochWSClient";
 
 type UseSignAndExecuteTransactionArgs = {
   transaction: Transaction
@@ -33,7 +33,7 @@ export function useSignAndExecuteTransaction({
   UseSignAndExecuteTransactionArgs,
   unknown
 > {
-  const client = useRoochClient()
+  const client = useRoochWSClient()
   const session = useCurrentSession()
 
   return useMutation({

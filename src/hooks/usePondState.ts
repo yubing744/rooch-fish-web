@@ -48,7 +48,7 @@ export function usePondState(pondID: PondID) {
   const foodTableHandleId = pondData?.foods?.handle?.id;
 
   const { fields: fishData } = useRoochWSFieldStates(fishTableHandleId, FishDynamicField, {
-    refetchInterval: 400,
+    refetchInterval: 10000,
     diffInterval: 40,
   });
 

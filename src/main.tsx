@@ -12,6 +12,8 @@ import ReactDOM from "react-dom/client";
 import TagManager from "react-gtm-module";
 import App from "./App.tsx";
 import "./index.css";
+
+import { config } from "./config/index"
 import { networkConfig } from "./networks.ts";
 import { theme } from "./theme.ts";
 
@@ -39,7 +41,7 @@ const StyledContent = styled(MaterialDesignContent)(() => ({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <QueryClientProvider client={queryClient}>
-      <RoochProvider networks={networkConfig} defaultNetwork="testnet">
+      <RoochProvider networks={networkConfig} defaultNetwork={config.network}>
         <WalletProvider chain={"bitcoin"} autoConnect>
           <SnackbarProvider
             Components={{
