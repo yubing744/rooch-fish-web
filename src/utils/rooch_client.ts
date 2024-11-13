@@ -155,7 +155,7 @@ export const getLatestTransaction = async (client: RoochClient) => {
   }
 };
 
-export const signAndExecuteTransaction = async({
+export const signAndExecuteTransactionX = async({
   client,
   transaction,
   seqNumber,
@@ -169,7 +169,7 @@ export const signAndExecuteTransaction = async({
   option?: {
     withOutput: boolean
   }
-}): Promise<ExecuteTransactionResponseView> {
+}): Promise<ExecuteTransactionResponseView> =>  {
   let transactionHex: string
 
   if (transaction instanceof Uint8Array) {

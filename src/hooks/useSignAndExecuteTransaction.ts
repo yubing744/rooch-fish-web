@@ -4,8 +4,11 @@
 import { roochMutationKeys } from '../constants'
 import { UseMutationOptions, UseMutationResult, useMutation } from '@tanstack/react-query'
 import { Signer, Transaction, ExecuteTransactionResponseView } from '@roochnetwork/rooch-sdk'
-import { useCurrentSession, useRoochClient } from '@roochnetwork/rooch-sdk-kit'
-import { useRoochWSClient } from "./useRoochWSClient";
+import { useCurrentSession } from '@roochnetwork/rooch-sdk-kit'
+import { useRoochWSClient } from "./useRoochWSClient"
+import { signAndExecuteTransactionX } from "../utils/index"
+import { useSeqNumber } from './useSeqNumber'
+import { useMemo } from 'react'
 
 type UseSignAndExecuteTransactionArgs = {
   transaction: Transaction
@@ -35,6 +38,15 @@ export function useSignAndExecuteTransaction({
 > {
   const client = useRoochWSClient()
   const session = useCurrentSession()
+  
+  const sender = useMemo(() => {
+    if (session) {
+      return session.getRoochAddress().toHexAddress()
+    }
+    return ''
+  }, [session])
+  
+  const { seqNumber, incrementLocal } = useSeqNumber(sender)
 
   return useMutation({
     mutationKey: roochMutationKeys.signAndExecuteTransaction(mutationKey),
@@ -43,15 +55,19 @@ export function useSignAndExecuteTransaction({
         throw Error('Create a session first')
       }
 
-      const result = await client.signAndExecuteTransaction({
+      const actualSigner = args.signer || session
+      const result = await signAndExecuteTransactionX({
+        client: client,
         transaction: args.transaction,
-        signer: args.signer || session,
+        seqNumber: seqNumber,
+        signer: actualSigner,
       })
 
       if (result.execution_info.status.type !== 'executed' && result.execution_info.status) {
-        Error('transfer failed' + result.execution_info.status.type)
+        throw Error('transfer failed' + result.execution_info.status.type)
       }
 
+      incrementLocal()
       return result
     },
     ...mutationOptions,
