@@ -136,7 +136,7 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
       });
     };
 
-    const gameLoop = setInterval(updatePosition, 100);
+    const gameLoop = setInterval(updatePosition, 30);
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);

@@ -63,7 +63,9 @@ export function useSignAndExecuteTransaction({
         signer: actualSigner,
       })
 
-      if (result.execution_info.status.type !== 'executed' && result.execution_info.status) {
+      console.log("result.execution_info.status:", result.execution_info.status);
+
+      if (result.execution_info.status.type !== 'executed') {
         throw Error('transfer failed' + result.execution_info.status.type)
       }
 
