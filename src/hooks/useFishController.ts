@@ -1,5 +1,5 @@
 import { config } from "../config/index";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Args, Transaction } from "@roochnetwork/rooch-sdk";
 import { useSnackbar } from 'notistack';
 import { useSignAndExecuteTransaction } from "./useSignAndExecuteTransaction";
@@ -29,12 +29,18 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
     velocity: { x: 0, y: 0 }
   });
 
+  const isMoving = useRef(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
 
   const handleFishMove = async (direction: number) => {
+    if (isMoving.current) {
+      return;
+    }
+
+    isMoving.current = true;
     console.log("move fish start, with direction:", direction, "fish_id:", fishID)
     
     setFishState(prev => ({ ...prev, error: undefined }));
@@ -78,6 +84,8 @@ export const useFishController = (pondID:number, fishID: number, initialX: numbe
           variant: "warning"
         });
       }
+    } finally {
+      isMoving.current = false;
     }
   };
 
