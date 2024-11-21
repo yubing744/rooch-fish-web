@@ -177,7 +177,7 @@ export const signAndExecuteTransactionX = async({
   } else {
     let sender = signer.getRoochAddress().toHexAddress()
     transaction.setChainId(await client.getChainId())
-    transaction.setSeqNumber(seqNumber)
+    transaction.setSeqNumber(BigInt(seqNumber))
     transaction.setSender(sender)
 
     const auth = await signer.signTransaction(transaction)
@@ -187,7 +187,7 @@ export const signAndExecuteTransactionX = async({
     transactionHex = `0x${transaction.encode().toHex()}`
   }
 
-  return await client.transport.request({
+  return await (client as any).transport.request({
     method: 'rooch_executeRawTransaction',
     params: [transactionHex, option],
   })

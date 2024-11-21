@@ -7,20 +7,30 @@ import { useRoochWSClient } from "./useRoochWSClient";
 import { BcsType } from "@roochnetwork/rooch-sdk";
 import { useTransactionDelay } from './useTransactionDelay';
 
-export function useRoochWSFieldStates(
+interface RoochWSFieldStatesResult<T> {
+  fields: Map<string, T>;
+  stateRoot: string | undefined;
+  isLoading: boolean;
+  startTracking: (txOrder: string) => void;
+  recordTxConfirm: (tempId: string, txOrder: string) => void;
+  recordStateSync: (txOrder: string) => void;
+  getRecentDelays: () => any;
+}
+
+export function useRoochWSFieldStates<T>(
   objectID: string, 
   fieldBcsType: BcsType<any, any>, 
   opts: { 
     refetchInterval: number,
     diffInterval: number
   }
-) {
+): RoochWSFieldStatesResult<T> {
   const client = useRoochWSClient();
   const [fields, setFields] = useState<Map<string, any>>(new Map<string, any>);
   const previousStateRootRef = useRef<string | undefined>();
   const lastValidFieldsRef = useRef<Map<string, any>>(new Map<string, any>());
   const isFetchingRef = useRef(false);
-  const processedTxOrdersRef = useRef<Set<string>>(new Set());
+  const processedTxOrdersRef = useRef<Set<string | undefined>>(new Set());
 
   const { 
     startTracking, 
@@ -139,7 +149,7 @@ export function useRoochWSFieldStates(
         updateFields(newFields);
 
         // Record state sync timing
-        if (!processedTxOrdersRef.current.has(txOrder)) {
+        if (txOrder && !processedTxOrdersRef.current.has(txOrder)) {
           recordStateSync(txOrder);
           processedTxOrdersRef.current.add(txOrder);
           

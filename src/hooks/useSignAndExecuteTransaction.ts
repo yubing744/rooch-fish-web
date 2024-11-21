@@ -38,6 +38,7 @@ export function useSignAndExecuteTransaction({
   unknown
 > & {
   getRecentDelays: () => any[]
+  recordStateSync: (txOrder: string) => void
 } {
   const client = useRoochWSClient()
   const session = useCurrentSession()
@@ -55,7 +56,7 @@ export function useSignAndExecuteTransaction({
 
   const mutation = useMutation({
     mutationKey: roochMutationKeys.signAndExecuteTransaction(mutationKey),
-    mutationFn: async (args) => {
+    mutationFn: async (args: any) => {
       if (!session) {
         throw Error('Create a session first')
       }
@@ -67,7 +68,7 @@ export function useSignAndExecuteTransaction({
       const result = await signAndExecuteTransactionX({
         client: client,
         transaction: args.transaction,
-        seqNumber: seqNumber,
+        seqNumber: Number(seqNumber),
         signer: actualSigner,
       })
 

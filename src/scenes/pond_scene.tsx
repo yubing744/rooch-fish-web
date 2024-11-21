@@ -77,7 +77,7 @@ export const PondScene = () => {
     return fishData.find((fish: any) => fish.id === fish_ids[0]);
   }, [fish_ids, fishData]);
 
-  useFishController(0, playerFirstFish ? parseInt(playerFirstFish.id) : 0, 100, 100, boundaries);
+  useFishController(0, playerFirstFish ? parseInt((playerFirstFish as any).id) : 0, 100, 100, boundaries);
 
   const { mutateAsync: signAndExecuteTransaction } =
       UseSignAndExecuteTransaction();

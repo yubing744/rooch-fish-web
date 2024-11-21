@@ -32,7 +32,51 @@ const FoodDynamicField = bcs.struct('DynamicField', {
   value: Food,
 });
 
-export function usePondState(pondID: PondID) {
+interface FishData {
+  id: number;
+  owner: string;
+  size: number;
+  x: number;
+  y: number;
+}
+
+interface FoodData {
+  id: number;
+  size: number;
+  x: number;
+  y: number;
+}
+
+interface PondStateData {
+  width: number,
+  height: number,
+  fishes: {
+    handle: {
+      id: string;
+    };
+  };
+  foods: {
+    handle: {
+      id: string;
+    };
+  };
+
+  exit_zones: any,
+}
+
+interface DelayRecord {
+  timestamp: number;
+  delay: number;
+}
+
+interface PondStateReturn {
+  data: PondStateData | null;
+  fishData: FishData[];
+  foodData: FoodData[];
+  getRecentDelays: any;
+}
+
+export function usePondState(pondID: PondID): PondStateReturn {
   const client = useRoochClient();
 
   const { data, txOrder, refetch: roochFishRefetch } = useRoochState(
