@@ -3,11 +3,10 @@ import { useRef, useCallback } from 'react';
 interface DelayRecord {
   txOrder: string;
   sendTime: number;
-  confirmTime?: number;
-  syncTime?: number;
-  totalDelay?: number;
-  syncDelay?: number;
-  isComplete: boolean;
+  confirmTime: number;
+  syncTime: number;
+  totalDelay: number;
+  syncDelay: number;
 }
 
 interface PendingTx {
@@ -15,87 +14,60 @@ interface PendingTx {
   sendTime: number;
   txOrder?: string;
   confirmTime?: number;
-  syncTime?: number;
 }
 
-export function useTransactionDelay() {
-  const delayRecordsRef = useRef<DelayRecord[]>([]);
-  const pendingTxsRef = useRef<Map<string, PendingTx>>(new Map());
-  const txOrderMapRef = useRef<Map<string, string>>(new Map());
+// Move these to module level
+const delayRecords: DelayRecord[] = [];
+const pendingTxs: Map<string, PendingTx> = new Map();
+const txOrderMap: Map<string, string> = new Map();
 
+export function useTransactionDelay() {
   const startTracking = useCallback(() => {
     const tempId = crypto.randomUUID();
-    pendingTxsRef.current.set(tempId, {
+    pendingTxs.set(tempId, {
       tempId,
       sendTime: Date.now(),
     });
     return tempId;
   }, []);
 
-  const updateDelayRecord = useCallback((pending: PendingTx, txOrder: string) => {
+  const recordTxConfirm = useCallback((tempId: string, txOrder: string) => {
+    const pending = pendingTxs.get(tempId);
+    if (pending) {
+      pending.txOrder = txOrder;
+      pending.confirmTime = Date.now();
+      txOrderMap.set(txOrder, tempId);
+    }
+  }, []);
+
+  const recordStateSync = useCallback((txOrder: string) => {
+    const tempId = txOrderMap.get(txOrder);
+    if (!tempId) return;
+
+    const pending = pendingTxs.get(tempId);
+    if (!pending || !pending.confirmTime) return;
+
+    const now = Date.now();
     const record: DelayRecord = {
       txOrder,
       sendTime: pending.sendTime,
       confirmTime: pending.confirmTime,
-      syncTime: pending.syncTime,
-      isComplete: Boolean(pending.confirmTime && pending.syncTime)
+      syncTime: now,
+      totalDelay: now - pending.sendTime,
+      syncDelay: now - pending.confirmTime,
     };
 
-    if (record.isComplete && record.confirmTime && record.syncTime) {
-      record.totalDelay = Math.max(record.confirmTime, record.syncTime) - record.sendTime;
-      record.syncDelay = Math.abs(record.syncTime - record.confirmTime);
+    delayRecords.unshift(record);
+    if (delayRecords.length > 5) {
+      delayRecords.pop();
     }
 
-    const existingIndex = delayRecordsRef.current.findIndex(r => r.txOrder === txOrder);
-    if (existingIndex >= 0) {
-      delayRecordsRef.current[existingIndex] = record;
-    } else {
-      delayRecordsRef.current = [record, ...delayRecordsRef.current.slice(0, 4)];
-    }
-
-    if (record.isComplete) {
-      pendingTxsRef.current.delete(pending.tempId);
-      txOrderMapRef.current.delete(txOrder);
-    }
+    pendingTxs.delete(tempId);
+    txOrderMap.delete(txOrder);
   }, []);
 
-  const recordTxConfirm = useCallback((tempId: string, txOrder: string) => {
-    const pending = pendingTxsRef.current.get(tempId);
-    if (!pending) return;
-
-    pending.txOrder = txOrder;
-    pending.confirmTime = Date.now();
-    txOrderMapRef.current.set(txOrder, tempId);
-    
-    updateDelayRecord(pending, txOrder);
-  }, [updateDelayRecord]);
-
-  const recordStateSync = useCallback((txOrder: string) => {
-    const tempId = txOrderMapRef.current.get(txOrder);
-    if (!tempId) {
-      const now = Date.now();
-      const newTempId = crypto.randomUUID();
-      const pending: PendingTx = {
-        tempId: newTempId,
-        sendTime: now,
-        txOrder,
-        syncTime: now
-      };
-      pendingTxsRef.current.set(newTempId, pending);
-      txOrderMapRef.current.set(txOrder, newTempId);
-      updateDelayRecord(pending, txOrder);
-      return;
-    }
-
-    const pending = pendingTxsRef.current.get(tempId);
-    if (!pending) return;
-
-    pending.syncTime = Date.now();
-    updateDelayRecord(pending, txOrder);
-  }, [updateDelayRecord]);
-
   const getRecentDelays = useCallback(() => {
-    return delayRecordsRef.current;
+    return delayRecords;
   }, []);
 
   return {
