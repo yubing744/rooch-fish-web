@@ -52,23 +52,17 @@ To get a local copy up and running, follow these steps:
 
 ### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/rooch_fish_web.git
-   cd rooch_fish_web
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Start the development server:
+2. Start the development server:
    ```bash
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:3000` to see the application in action.
+3. Open your browser and navigate to `http://localhost:3000` to see the application in action.
 
 ## Scripts
 

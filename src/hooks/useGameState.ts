@@ -1,6 +1,5 @@
 import { config } from "../config/index";
 import { useRoochClientQuery } from "@roochnetwork/rooch-sdk-kit";
-import { IndexerObjectStateView, RoochClient } from "@roochnetwork/rooch-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
 import { listFieldStates } from "../utils/index"
@@ -43,8 +42,6 @@ export function useGameState() {
     queryFn: async () => pondHandleId ? listFieldStates(client, pondHandleId) : null,
     enabled: !!pondHandleId,
   });
-
-  //console.log("pondsData:", pondsData)
 
   const finalGameState = gameState ? {
     ...gameState,

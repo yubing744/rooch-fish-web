@@ -1,5 +1,5 @@
 import { Container, Graphics, Stage } from '@pixi/react';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
 import { Box, Button, Paper, Typography, Grid,  AppBar, Toolbar } from '@mui/material';
 import { useSnackbar } from 'notistack';
@@ -31,8 +31,6 @@ export const PondScene = () => {
   const width = 800;
   const height = 800;
 
-  //console.log("fishData:", fishData)
-
   const scale = useMemo(() => {
     if (!pondState) return 1;
     
@@ -55,8 +53,6 @@ export const PondScene = () => {
     const colorMatrix = new ColorMatrixFilter();
     
     colorMatrix.brightness(1.1, true);
-    //colorMatrix.tint(0x4FA4FF, 0.2);
-    
     return [blur, colorMatrix];
   }, []);
 
@@ -361,18 +357,13 @@ export const PondScene = () => {
             backgroundColor: 'rgba(255, 255, 255, 0.9)'
           }}
         >
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={4}>
               <Typography>
-                X: {Math.round(playerFirstFish.x)}
+                Position: ({Math.round(playerFirstFish.x)}, {Math.round(playerFirstFish.y)})
               </Typography>
             </Grid>
-            <Grid item xs={6}>
-              <Typography>
-                Y: {Math.round(playerFirstFish.y)}
-              </Typography>
-            </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <Typography>
                 Confirm: {(() => {
                   const delays = getRecentDelays();
@@ -381,7 +372,7 @@ export const PondScene = () => {
                 })()}
               </Typography>
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={4}>
               <Typography>
                 Sync: {(() => {
                   const delays = getRecentDelays();
