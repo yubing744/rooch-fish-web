@@ -8,7 +8,8 @@ import { useCurrentSession } from '@roochnetwork/rooch-sdk-kit'
 import { useRoochWSClient } from "./useRoochWSClient"
 import { signAndExecuteTransactionX } from "../utils/index"
 import { useSeqNumber } from './useSeqNumber'
-import { useMemo } from 'react'
+import { useTransactionDelay } from './useTransactionDelay'
+import { useRef, useMemo } from 'react'
 
 type UseSignAndExecuteTransactionArgs = {
   transaction: Transaction
@@ -35,9 +36,12 @@ export function useSignAndExecuteTransaction({
   Error,
   UseSignAndExecuteTransactionArgs,
   unknown
-> {
+> & {
+  getRecentDelays: () => any[]
+} {
   const client = useRoochWSClient()
   const session = useCurrentSession()
+  const lastTempIdRef = useRef<string>()
   
   const sender = useMemo(() => {
     if (session) {
@@ -47,13 +51,17 @@ export function useSignAndExecuteTransaction({
   }, [session])
   
   const { seqNumber, incrementLocal } = useSeqNumber(sender)
+  const { startTracking, recordTxConfirm, recordStateSync, getRecentDelays } = useTransactionDelay()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationKey: roochMutationKeys.signAndExecuteTransaction(mutationKey),
     mutationFn: async (args) => {
       if (!session) {
         throw Error('Create a session first')
       }
+
+      const tempId = startTracking()
+      lastTempIdRef.current = tempId
 
       const actualSigner = args.signer || session
       const result = await signAndExecuteTransactionX({
@@ -69,9 +77,19 @@ export function useSignAndExecuteTransaction({
         throw Error('transfer failed' + result.execution_info.status.type)
       }
 
+      if (result.sequence_info) {
+        recordTxConfirm(tempId, result.sequence_info.tx_order)
+      }
+      
       incrementLocal()
       return result
     },
     ...mutationOptions,
   })
+
+  return {
+    ...mutation,
+    getRecentDelays,
+    recordStateSync,
+  }
 }

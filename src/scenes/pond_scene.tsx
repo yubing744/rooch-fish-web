@@ -25,7 +25,7 @@ export const PondScene = () => {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
-  const { data: pondState, fishData, foodData } = usePondState(0);
+  const { data: pondState, fishData, foodData, getRecentDelays  } = usePondState(0);
   const { fish_ids } = usePlayerState(0)
   
   const width = 800;
@@ -208,6 +208,22 @@ export const PondScene = () => {
     }
   };
 
+  // Add this utility function at the bottom of the file or in utils/time.ts
+  const getAverageDelay = (delays: any[]) => {
+    if (!delays || delays.length === 0) return null;
+    const sum = delays.reduce((acc, curr) => {
+      return {
+        totalDelay: acc.totalDelay + curr.totalDelay,
+        syncDelay: acc.syncDelay + curr.syncDelay
+      };
+    }, { totalDelay: 0, syncDelay: 0 });
+    
+    return {
+      confirmDelay: Math.round((sum.totalDelay - sum.syncDelay) / delays.length),
+      syncDelay: Math.round(sum.syncDelay / delays.length)
+    };
+  };
+
   return (
     <Box>
       <AppBar position="static" color="transparent" elevation={0} sx={{ mb: 2 }}>
@@ -354,6 +370,24 @@ export const PondScene = () => {
             <Grid item xs={6}>
               <Typography>
                 Y: {Math.round(playerFirstFish.y)}
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography>
+                Confirm: {(() => {
+                  const delays = getRecentDelays();
+                  const avg = getAverageDelay(delays);
+                  return avg ? `${avg.confirmDelay}ms` : 'N/A';
+                })()}
+              </Typography>
+            </Grid>
+            <Grid item xs={3}>
+              <Typography>
+                Sync: {(() => {
+                  const delays = getRecentDelays();
+                  const avg = getAverageDelay(delays);
+                  return avg ? `${avg.syncDelay}ms` : 'N/A';
+                })()}
               </Typography>
             </Grid>
           </Grid>
