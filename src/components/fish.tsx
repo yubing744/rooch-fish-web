@@ -1,5 +1,5 @@
 import { Container, Graphics } from '@pixi/react';
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 import * as PIXI from 'pixi.js';
 
 interface FishProps {

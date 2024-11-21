@@ -1,4 +1,4 @@
-import { TransactionWithInfoView, RoochClient } from "@roochnetwork/rooch-sdk";
+import { TransactionWithInfoView, RoochClient, Transaction, Bytes, Signer, ExecuteTransactionResponseView, str } from "@roochnetwork/rooch-sdk";
  
 export const listFieldStates = async (client: RoochClient, object_id: string, stateRoot?: string | null) => {
   try {
@@ -95,7 +95,6 @@ export const syncStates = async (client: RoochClient, object_id: string, txOrder
 export const getTransactionsByOrder = async (client: RoochClient, cursor: number | null, limit: number | null, descending_order: boolean) => {
   try {
     let result: TransactionWithInfoView[] = [];
-    let cursor = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
@@ -156,3 +155,40 @@ export const getLatestTransaction = async (client: RoochClient) => {
   }
 };
 
+export const signAndExecuteTransactionX = async({
+  client,
+  transaction,
+  seqNumber,
+  signer,
+  option = { withOutput: true },
+}: {
+  client: RoochClient
+  transaction: Transaction | Bytes
+  seqNumber: number
+  signer: Signer
+  option?: {
+    withOutput: boolean
+  }
+}): Promise<ExecuteTransactionResponseView> =>  {
+  let transactionHex: string
+
+  if (transaction instanceof Uint8Array) {
+    transactionHex = str('hex', transaction)
+  } else {
+    let sender = signer.getRoochAddress().toHexAddress()
+    transaction.setChainId(await client.getChainId())
+    transaction.setSeqNumber(seqNumber)
+    transaction.setSender(sender)
+
+    const auth = await signer.signTransaction(transaction)
+
+    transaction.setAuth(auth)
+
+    transactionHex = `0x${transaction.encode().toHex()}`
+  }
+
+  return await client.transport.request({
+    method: 'rooch_executeRawTransaction',
+    params: [transactionHex, option],
+  })
+}

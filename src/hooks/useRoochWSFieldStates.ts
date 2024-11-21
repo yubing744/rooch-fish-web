@@ -5,6 +5,7 @@ import { getLatestTransaction } from "../utils/rooch_client";
 import { listFieldStates, syncStates } from "../utils/index";
 import { useRoochWSClient } from "./useRoochWSClient";
 import { BcsType } from "@roochnetwork/rooch-sdk";
+import { useTransactionDelay } from './useTransactionDelay';
 
 export function useRoochWSFieldStates(
   objectID: string, 
@@ -19,6 +20,14 @@ export function useRoochWSFieldStates(
   const previousStateRootRef = useRef<string | undefined>();
   const lastValidFieldsRef = useRef<Map<string, any>>(new Map<string, any>());
   const isFetchingRef = useRef(false);
+  const processedTxOrdersRef = useRef<Set<string>>(new Set());
+
+  const { 
+    startTracking, 
+    recordTxConfirm, 
+    recordStateSync, 
+    getRecentDelays 
+  } = useTransactionDelay();
 
   const { data: latestTxData } = useQuery({
     queryKey: ["rooch_latest_tx_for_use_rooch_ws_field_states"],
@@ -128,6 +137,20 @@ export function useRoochWSFieldStates(
         }
         
         updateFields(newFields);
+
+        // Record state sync timing
+        if (!processedTxOrdersRef.current.has(txOrder)) {
+          recordStateSync(txOrder);
+          processedTxOrdersRef.current.add(txOrder);
+          
+          // Clean up old processed tx orders (keep last 100)
+          if (processedTxOrdersRef.current.size > 100) {
+            const orders = Array.from(processedTxOrdersRef.current);
+            orders.slice(0, orders.length - 100).forEach(order => {
+              processedTxOrdersRef.current.delete(order);
+            });
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching diff states:", error);
@@ -157,5 +180,11 @@ export function useRoochWSFieldStates(
     fields: fields.size > 0 ? fields : lastValidFieldsRef.current,
     stateRoot,
     isLoading: isFetchingRef.current,
+
+    // Export delay tracking functions
+    startTracking,
+    recordTxConfirm,
+    recordStateSync,
+    getRecentDelays,
   };
 }

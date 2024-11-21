@@ -47,8 +47,8 @@ export function usePondState(pondID: PondID) {
   const fishTableHandleId = pondData?.fishes?.handle?.id;
   const foodTableHandleId = pondData?.foods?.handle?.id;
 
-  const { fields: fishData } = useRoochWSFieldStates(fishTableHandleId, FishDynamicField, {
-    refetchInterval: 400,
+  const { fields: fishData, getRecentDelays } = useRoochWSFieldStates(fishTableHandleId, FishDynamicField, {
+    refetchInterval: 10000,
     diffInterval: 40,
   });
 
@@ -66,7 +66,8 @@ export function usePondState(pondID: PondID) {
   return { 
     data: finalPondState, 
     fishData: finalFishData, 
-    foodData: finalFoodData
+    foodData: finalFoodData,
+    getRecentDelays
   };
 }
 

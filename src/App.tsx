@@ -111,6 +111,8 @@ function App() {
 
   const [showLeaderboard, setShowLeaderboard] = useState(false);
 
+  console.log("currentAddress:", currentAddress?.genRoochAddress().toStr() || "");
+  
   const { data: RCCBalance, refetch: refetchRCCBalance } = useRoochClientQuery(
     "getBalance",
     {

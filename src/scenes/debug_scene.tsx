@@ -1,17 +1,12 @@
 import { Buffer } from 'buffer';
-import { Container, Graphics, Stage } from '@pixi/react';
-import { useMemo, useEffect, useState, useRef } from 'react';
-import { BlurFilter, ColorMatrixFilter } from 'pixi.js';
-import { Box, Button, Paper, Typography, Grid, AppBar, Toolbar } from '@mui/material';
+import { useEffect, useState, useRef } from 'react';
+import { Box, Button, Typography, AppBar, Toolbar } from '@mui/material';
 import { bcs } from "@roochnetwork/rooch-sdk";
 import { useSnackbar } from 'notistack';
 import { usePondState } from '../hooks/usePondState';
 
 export const DebugScene = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const [purchaseLoading, setPurchaseLoading] = useState(false);
-  const [feedLoading, setFeedLoading] = useState(false);
-  const [exitLoading, setExitLoading] = useState(false);
   const [wsStatus, setWsStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const wsRef = useRef<WebSocket | null>(null);
   const requestIdRef = useRef(0);
@@ -24,13 +19,13 @@ export const DebugScene = () => {
   const testWebSocket = () => {
     try {
       setWsStatus('connecting');
-      const ws = new WebSocket('wss://test-seed.rooch.network/'); // 替换成你的 WebSocket 地址
+      const ws = new WebSocket('wss://test-seed.rooch.network/'); // Replace with your WebSocket address
       wsRef.current = ws;
 
       ws.onopen = () => {
         setWsStatus('connected');
         enqueueSnackbar('WebSocket connected successfully!', { variant: 'success' });
-        // 发送测试消息
+        // Send a test message
         ws.send('Hello Server!');
       };
 
@@ -65,24 +60,6 @@ export const DebugScene = () => {
     }
   };
 
-  /*
-    {
-        "jsonrpc": "2.0",
-        "id": 10,
-        "method": "rooch_syncStates",
-        "params": [
-            {
-                "object_i_d": "0x331bc3f86328ed93a71dca803349df9a7b44ef4c697c9522a0f70ece05381bbc"
-            },
-            "89209125",
-            "100",
-            {
-                "decode": true,
-                "descending": false
-            }
-        ]
-    }
-  */
   const sendSyncStatesRequest = () => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       enqueueSnackbar('WebSocket not connected!', { variant: 'error' });
@@ -112,7 +89,7 @@ export const DebugScene = () => {
     }
   };
 
-  // 组件卸载时关闭连接
+  // Close the connection when the component is unmounted
   useEffect(() => {
     return () => {
       if (wsRef.current) {
@@ -123,16 +100,16 @@ export const DebugScene = () => {
 
   const testBcsDeserialization = () => {
     try {
-      // 定义Fish结构
+      // Define Fish structure
       const Fish = bcs.struct('Fish', {
         id: bcs.u64(),
-        owner: bcs.Address, // Move address是32字节
+        owner: bcs.Address, // Move address is 32 bytes
         size: bcs.u64(),
         x: bcs.u64(),
         y: bcs.u64(),
       });
 
-      // 定义DynamicField结构
+      // Defining the DynamicField structure
       const DynamicField = bcs.struct('DynamicField', {
         name: bcs.u64(),
         value: Fish,

@@ -20,15 +20,11 @@ export function usePlayerState(pondID: number) {
   const currentAddress = useCurrentAddress();
   const client = useRoochClient();
 
-  //console.log("usePlayerState currentAddress:", currentAddress);
-
   const { data } = useQuery({
     queryKey: ["query_user_fishs"],
     queryFn: async () => queryUserFishs(client, pondID, currentAddress),
     refetchInterval: 5000 
   });
-
-  //console.log("usePlayerState data:", data);
 
   const fish_ids = (data?.data?.return_values?.[0]?.decoded_value ?? null) as Array<number>;
   return { fish_ids };

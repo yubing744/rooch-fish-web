@@ -4,8 +4,12 @@
 import { roochMutationKeys } from '../constants'
 import { UseMutationOptions, UseMutationResult, useMutation } from '@tanstack/react-query'
 import { Signer, Transaction, ExecuteTransactionResponseView } from '@roochnetwork/rooch-sdk'
-import { useCurrentSession, useRoochClient } from '@roochnetwork/rooch-sdk-kit'
-//import { useRoochWSClient } from "./useRoochWSClient";
+import { useCurrentSession } from '@roochnetwork/rooch-sdk-kit'
+import { useRoochWSClient } from "./useRoochWSClient"
+import { signAndExecuteTransactionX } from "../utils/index"
+import { useSeqNumber } from './useSeqNumber'
+import { useTransactionDelay } from './useTransactionDelay'
+import { useRef, useMemo } from 'react'
 
 type UseSignAndExecuteTransactionArgs = {
   transaction: Transaction
@@ -32,28 +36,60 @@ export function useSignAndExecuteTransaction({
   Error,
   UseSignAndExecuteTransactionArgs,
   unknown
-> {
-  const client = useRoochClient()
+> & {
+  getRecentDelays: () => any[]
+} {
+  const client = useRoochWSClient()
   const session = useCurrentSession()
+  const lastTempIdRef = useRef<string>()
+  
+  const sender = useMemo(() => {
+    if (session) {
+      return session.getRoochAddress().toHexAddress()
+    }
+    return ''
+  }, [session])
+  
+  const { seqNumber, incrementLocal } = useSeqNumber(sender)
+  const { startTracking, recordTxConfirm, recordStateSync, getRecentDelays } = useTransactionDelay()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationKey: roochMutationKeys.signAndExecuteTransaction(mutationKey),
     mutationFn: async (args) => {
       if (!session) {
         throw Error('Create a session first')
       }
 
-      const result = await client.signAndExecuteTransaction({
+      const tempId = startTracking()
+      lastTempIdRef.current = tempId
+
+      const actualSigner = args.signer || session
+      const result = await signAndExecuteTransactionX({
+        client: client,
         transaction: args.transaction,
-        signer: args.signer || session,
+        seqNumber: seqNumber,
+        signer: actualSigner,
       })
 
-      if (result.execution_info.status.type !== 'executed' && result.execution_info.status) {
-        Error('transfer failed' + result.execution_info.status.type)
+      console.log("result.execution_info.status:", result.execution_info.status);
+
+      if (result.execution_info.status.type !== 'executed') {
+        throw Error('transfer failed' + result.execution_info.status.type)
       }
 
+      if (result.sequence_info) {
+        recordTxConfirm(tempId, result.sequence_info.tx_order)
+      }
+      
+      incrementLocal()
       return result
     },
     ...mutationOptions,
   })
+
+  return {
+    ...mutation,
+    getRecentDelays,
+    recordStateSync,
+  }
 }
