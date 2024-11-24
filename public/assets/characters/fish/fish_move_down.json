@@ -1,0 +1,135 @@
+{
+  "frames": {
+    "5.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 37.7,
+        "h": 58.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 37.7,
+        "h": 58.5
+      },
+      "sourceSize": {
+        "w": 37.7,
+        "h": 58.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "2.png": {
+      "frame": {
+        "x": 0,
+        "y": 58.5,
+        "w": 42.2,
+        "h": 58.400000000000006
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 42.2,
+        "h": 58.400000000000006
+      },
+      "sourceSize": {
+        "w": 42.2,
+        "h": 58.400000000000006
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "1.png": {
+      "frame": {
+        "x": 37.7,
+        "y": 0,
+        "w": 36.800000000000004,
+        "h": 58.300000000000004
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 36.800000000000004,
+        "h": 58.300000000000004
+      },
+      "sourceSize": {
+        "w": 36.800000000000004,
+        "h": 58.300000000000004
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "4.png": {
+      "frame": {
+        "x": 0,
+        "y": 116.9,
+        "w": 49.6,
+        "h": 58.2
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 49.6,
+        "h": 58.2
+      },
+      "sourceSize": {
+        "w": 49.6,
+        "h": 58.2
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "3.png": {
+      "frame": {
+        "x": 42.2,
+        "y": 58.300000000000004,
+        "w": 48.5,
+        "h": 57.2
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48.5,
+        "h": 57.2
+      },
+      "sourceSize": {
+        "w": 48.5,
+        "h": 57.2
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "fish_move_down.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 91,
+      "h": 175
+    },
+    "scale": 0.1
+  }
+}

@@ -12,7 +12,8 @@ export const config = {
     5: "0x7fe629442f293a0307c7cc6ae12edc0c60c4a7708c75a83b5f671ff03544e781",
     6: "0x855d118b9da7ac1f32922cf568f51d9df1e28cd0205d9f241ba0007c22fea5bb",
     7: "0xac8652636629f6bfe5ac6e102308bc032b01101243e50a3604c3d12955abf179"
-  }
+  },
+  publicURL: `${import.meta.env.VITE_PUBLIC_URL}`,
 }
 
 export type PondID = keyof typeof config.ponds;
