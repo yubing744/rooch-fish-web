@@ -15,7 +15,20 @@ interface FishProps {
     x: number;
     y: number;
   };
+  color: number;
 }
+
+const lightenColor = (color: number, factor: number = 0.7): number => {
+  const r = (color >> 16) & 0xFF;
+  const g = (color >> 8) & 0xFF;
+  const b = color & 0xFF;
+  
+  const lighterR = Math.round(r + (255 - r) * factor);
+  const lighterG = Math.round(g + (255 - g) * factor);
+  const lighterB = Math.round(b + (255 - b) * factor);
+  
+  return (lighterR << 16) | (lighterG << 8) | lighterB;
+};
 
 const getAnimationState = (velocity: { x: number; y: number }): {
   state: AnimationState;
@@ -48,15 +61,19 @@ export const Fish = ({
   y, 
   scale = 1, 
   rotation = 0,
-  velocity = { x: 0, y: 0 }
+  velocity = { x: 0, y: 0 },
+  color = 0xFFFFFF
 }: FishProps) => {
   const app = useApp();
   const [texturesMap, setTexturesMap] = useState<Record<string, PIXI.Texture[]>>({});
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const { state, direction } = useMemo(
-    () => getAnimationState(velocity),
-    [velocity]
+  const { state, direction, lightColor } = useMemo(
+    () => ({
+      ...getAnimationState(velocity),
+      lightColor: lightenColor(color, 0.5)
+    }),
+    [velocity, color]
   );
 
   useEffect(() => {
@@ -106,6 +123,7 @@ export const Fish = ({
         isPlaying={true}
         animationSpeed={0.1}
         anchor={0.5}
+        tint={lightColor}
       />
     </Container>
   );

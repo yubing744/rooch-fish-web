@@ -300,6 +300,7 @@ export const PondScene = () => {
                         y={40 + fishState.y * scale} 
                         rotation={0}
                         scale={fishState.size / 7} 
+                        color={playerFirstFish?.id == fishState.id ? BlueColor : RedColor}
                       />
                   ))}
 
