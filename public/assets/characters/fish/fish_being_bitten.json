@@ -1,0 +1,87 @@
+{
+  "frames": {
+    "1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "sourceSize": {
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "2.png": {
+      "frame": {
+        "x": 75,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "sourceSize": {
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "3.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "sourceSize": {
+        "w": 75,
+        "h": 58.400000000000006
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "fish_being_bitten.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 150,
+      "h": 58
+    },
+    "scale": 0.1
+  }
+}
