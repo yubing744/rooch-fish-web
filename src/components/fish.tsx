@@ -16,6 +16,7 @@ interface FishProps {
     y: number;
   };
   color: number;
+  isPlayerFish?: boolean;
 }
 
 const lightenColor = (color: number, factor: number = 0.7): number => {
@@ -62,7 +63,8 @@ export const Fish = ({
   scale = 1, 
   rotation = 0,
   velocity = { x: 0, y: 0 },
-  color = 0xFFFFFF
+  color = 0xFFFFFF,
+  isPlayerFish = false
 }: FishProps) => {
   const app = useApp();
   const [texturesMap, setTexturesMap] = useState<Record<string, PIXI.Texture[]>>({});
@@ -71,7 +73,7 @@ export const Fish = ({
   const { state, direction, lightColor } = useMemo(
     () => ({
       ...getAnimationState(velocity),
-      lightColor: lightenColor(color, 0.5)
+      lightColor: isPlayerFish ? 0xFFFFFF : lightenColor(color)
     }),
     [velocity, color]
   );
