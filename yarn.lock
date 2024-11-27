@@ -1004,22 +1004,22 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.24.0.tgz#0574d7e87b44ee8511d08cc7f914bcb802b70818"
   integrity sha512-fbMkAF7fufku0N2dE5TBXcNlg0pt0cJue4xBRE2Qc5Vqikxr4VCgKj/ht6SMdFcOacVA9rqF70APJ8RN/4vMJw==
 
-"@roochnetwork/rooch-sdk-kit@^0.2.1":
-  version "0.2.7"
-  resolved "https://registry.npmjs.org/@roochnetwork/rooch-sdk-kit/-/rooch-sdk-kit-0.2.7.tgz#b97d175ff48f2f42b4e38888eb8fd8dd6f072977"
-  integrity sha512-4RP41/3aAMxPHlMef9f8V45HRwXWW0M5fkWFCf12L5O1v0iaBxbL0O3pw8Lsu8ESd7BKdvk1ho5Qz7L+J/bcOg==
+"@roochnetwork/rooch-sdk-kit@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.npmjs.org/@roochnetwork/rooch-sdk-kit/-/rooch-sdk-kit-0.2.8.tgz#6f1286e976c493288b02630013b2b315fd58707c"
+  integrity sha512-5llBaYp98n3VUKTlKS3VaGyRl1BPzsk5ETOVQXizeKPbikUOOhgPocoNS7+CWkD7ef4CgGVSTNCq+ie+ofsHjQ==
   dependencies:
-    "@roochnetwork/rooch-sdk" "0.2.7"
+    "@roochnetwork/rooch-sdk" "0.2.8"
     "@vanilla-extract/css" "^1.15.5"
     "@vanilla-extract/dynamic" "^2.1.2"
     "@vanilla-extract/recipes" "^0.5.5"
     clsx "^2.1.1"
     zustand "^4.5.5"
 
-"@roochnetwork/rooch-sdk@0.2.7", "@roochnetwork/rooch-sdk@^0.2.1":
-  version "0.2.7"
-  resolved "https://registry.npmjs.org/@roochnetwork/rooch-sdk/-/rooch-sdk-0.2.7.tgz#c58dcc3a83ec8bbe587e3051a65e7825a73afeda"
-  integrity sha512-iQdoN06ijFLmdyPfOxgQGhcgl62vkhRKWUQ1fZO0+V2Kpu8wF4qN2Xg7nqZ8VCC5Kr1g9St2CmS60PXPjpCgPw==
+"@roochnetwork/rooch-sdk@0.2.8", "@roochnetwork/rooch-sdk@^0.2.8":
+  version "0.2.8"
+  resolved "https://registry.npmjs.org/@roochnetwork/rooch-sdk/-/rooch-sdk-0.2.8.tgz#ad6fb7315f80816d956e46076361ed613ae63770"
+  integrity sha512-XEdCOYKuTDYNAblRK7LrvoZF4vGCu/13FbajAGnIW0ooHTTN/usrrEMg0l9rfr79N9l8G3k9m/P89mWbNPf0hg==
   dependencies:
     "@mysten/bcs" "1.0.4"
     "@noble/curves" "~1.6.0"
