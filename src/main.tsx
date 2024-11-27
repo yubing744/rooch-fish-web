@@ -44,14 +44,21 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <RoochProvider networks={networkConfig} defaultNetwork={config.network}>
         <WalletProvider chain={"bitcoin"} autoConnect>
           <SnackbarProvider
-            Components={{
-              success: StyledContent,
-              error: StyledContent,
-              warning: StyledContent,
-              info: StyledContent,
-            }}
-          />
-          <App />
+              Components={{
+                success: StyledContent,
+                error: StyledContent,
+                warning: StyledContent,
+                info: StyledContent,
+              }}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              autoHideDuration={3000}
+              maxSnack={3}
+            >
+              <App />
+            </SnackbarProvider>
         </WalletProvider>
       </RoochProvider>
     </QueryClientProvider>
