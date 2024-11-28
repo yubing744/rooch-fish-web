@@ -56,22 +56,6 @@ export const PondScene = () => {
     return [blur, colorMatrix];
   }, []);
 
-  const foodItems = useMemo(() => {
-    const items = [];
-    const foodColors = [0x00FF00, 0xFFFF00, 0xFFA500];
-    const margin = 40;
-    
-    for (let i = 0; i < 10; i++) {
-      items.push({
-        x: margin + Math.random() * (width - margin * 2),
-        y: margin + Math.random() * (height - margin * 2),
-        size: 4 + Math.random() * 4,
-        color: foodColors[Math.floor(Math.random() * foodColors.length)]
-      });
-    }
-    return items;
-  }, [width, height]);
-
   const playerFirstFish = useMemo(() => {
     if (!fish_ids || !fishData || fish_ids.length === 0) return null;
     return fishData.find((fish: any) => fish.id === fish_ids[0]);
@@ -153,6 +137,8 @@ export const PondScene = () => {
   const isInExitZone = (fishX: number, fishY: number): boolean => {
     if (!pondState?.exit_zones) return false;
     
+    console.log("pondState exit_zones:", pondState.exit_zones, "fishX:", fishX, "fishY:", fishY)
+
     return pondState.exit_zones.some((zone: ExitZone) => {
       const distance = Math.sqrt(
         Math.pow(fishX - zone.x, 2) + 

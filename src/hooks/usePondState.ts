@@ -5,6 +5,7 @@ import { useRoochClient } from "@roochnetwork/rooch-sdk-kit";
 import { useRoochState } from "./useRoochStates"
 import { useRoochFieldStates } from "./useRoochFieldStates"
 import { useRoochWSFieldStates } from "./useRoochWSFieldStates"
+import { ExitZone } from "../types/index"
 
 const Fish = bcs.struct('Fish', {
   id: bcs.u64(),
@@ -106,6 +107,16 @@ export function usePondState(pondID: PondID): PondStateReturn {
 
   const finalFishData = transformFish(fishData);
   const finalFoodData = transformFood(foodData);
+  
+  if (finalPondState) {
+    finalPondState.exit_zones = Array.from(finalPondState.exit_zones).map((data: any)=>{
+      return {
+        x: data[0],
+        y: data[1],
+        radius: data[2],
+      } as ExitZone
+    });
+  }
   
   return { 
     data: finalPondState, 
